@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "mark-ready": "tsx scripts/mark-ready.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
     "lucide-react": "^0.567.0",
     "next": "16.1.6",
     "react": "19.2.3",
@@ -18,7 +19,6 @@
     "react-signature-canvas": "^1.1.0-alpha.2"
   },
   "devDependencies": {
-    "@prisma/client": "^6.19.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
