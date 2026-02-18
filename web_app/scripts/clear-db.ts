@@ -7,7 +7,8 @@ import prisma from '../src/lib/prisma';
 async function main() {
     console.log('Clearing database...');
 
-    // Delete children first
+    // Delete children (CarpetItem) first due to foreign key constraints,
+    // though Prisma deleteMany usually handles this or cascade delete is used.
     await prisma.carpetItem.deleteMany({});
     console.log('Deleted all carpet items.');
 

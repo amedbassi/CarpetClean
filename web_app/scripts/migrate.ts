@@ -5,7 +5,7 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 
 async function main() {
-    const jsonPath = path.join(__dirname, '../data/orders.json');
+    const jsonPath = path.join(process.cwd(), 'data', 'orders.json');
     if (!fs.existsSync(jsonPath)) {
         console.log('No orders.json found. Skipping migration.');
         return;
@@ -28,11 +28,20 @@ async function main() {
                     address: orderData.address,
                     signature: orderData.signature,
                     receipt: orderData.receipt,
-                    // New fields initialization
                     requiresApproval: false,
                     approvalStatus: "not_needed",
                     items: {
-                        create: orderData.items.map((item: any) => ({
+                        create: orderData.items.map((item: {
+                            id: string;
+                            status?: string;
+                            length?: string;
+                            width?: string;
+                            material?: string;
+                            state?: string;
+                            photo?: string;
+                            cleaningCost?: number;
+                            repairEstimate?: { cost: number; description: string };
+                        }) => ({
                             id: item.id,
                             status: item.status || "pending",
                             length: item.length,
