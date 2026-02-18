@@ -1,3 +1,7 @@
+/**
+ * Script to clear the database by deleting all carpet items and orders.
+ * Use with caution.
+ */
 import prisma from '../src/lib/prisma';
 
 async function main() {
