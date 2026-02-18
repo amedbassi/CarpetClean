@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../src/lib/prisma';
 
 async function main() {
     console.log('Clearing database...');
@@ -16,8 +14,8 @@ async function main() {
 }
 
 main()
-    .catch((e) => {
-        console.error(e);
+    .catch((error) => {
+        console.error(error);
         process.exit(1);
     })
     .finally(async () => {
