@@ -63,7 +63,7 @@ export default function DeliveryDashboard() {
         </div>
     );
 
-    const readyOrders = orders;
+    const readyOrders = Array.isArray(orders) ? orders : [];
 
     return (
         <div className="max-w-4xl mx-auto p-4 space-y-8">
@@ -95,7 +95,7 @@ export default function DeliveryDashboard() {
                         {optimizing ? (
                             <>
                                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Analyzing Routs...
+                                Analyzing Routes...
                             </>
                         ) : (
                             <>
@@ -114,15 +114,15 @@ export default function DeliveryDashboard() {
                         key={order.id}
                         onClick={() => toggleSelection(order.id)}
                         className={`group cursor-pointer bg-white rounded-xl border-2 transition-all overflow-hidden ${selectedIds.includes(order.id)
-                                ? 'border-blue-500 ring-4 ring-blue-500/10'
-                                : 'border-gray-100 hover:border-blue-200'
+                            ? 'border-blue-500 ring-4 ring-blue-500/10'
+                            : 'border-gray-100 hover:border-blue-200'
                             }`}
                     >
                         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-start space-x-4">
                                 <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-colors ${selectedIds.includes(order.id)
-                                        ? 'bg-blue-600 border-blue-600'
-                                        : 'bg-white border-gray-300 group-hover:border-blue-400'
+                                    ? 'bg-blue-600 border-blue-600'
+                                    : 'bg-white border-gray-300 group-hover:border-blue-400'
                                     } flex items-center justify-center`}>
                                     {selectedIds.includes(order.id) && <CheckCircle className="w-4 h-4 text-white" />}
                                 </div>

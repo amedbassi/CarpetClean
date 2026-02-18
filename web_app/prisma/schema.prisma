@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,26 +15,26 @@ model Order {
   phone            String?
   email            String?
   address          String?
-  signature        String?      // Base64 string
-  receipt          String?      // File path or placeholder
+  signature        String?
+  receipt          String?
   requiresApproval Boolean      @default(false)
-  approvalStatus   String       @default("not_needed") // not_needed, pending, approved, rejected
+  approvalStatus   String       @default("not_needed")
   items            CarpetItem[]
 }
 
 model CarpetItem {
   id                String
   orderId           String
-  order             Order    @relation(fields: [orderId], references: [id])
-  status            String   @default("pending") // pending, measured, ready_for_delivery, delivered
+  status            String  @default("pending")
   length            String?
   width             String?
   material          String?
   state             String?
-  photo             String?  // File path or placeholder
+  photo             String?
   cleaningCost      Float?
   repairCost        Float?
   repairDescription String?
-  
+  order             Order   @relation(fields: [orderId], references: [id])
+
   @@id([orderId, id])
 }
