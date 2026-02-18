@@ -1,0 +1,92 @@
+﻿
+> web_app@0.1.0 lint
+> eslint
+
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\prisma\seed.js
+  1:1   error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  4:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\scripts\migrate.js
+  1:26  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  4:1   error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\scripts\migrate.ts
+  35:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\app\api\migrate\route.ts
+  50:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  66:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  79:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\app\api\orders\route.ts
+  24:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  58:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\app\approve\[id]\page.tsx
+   5:49  warning  'CreditCard' is defined but never used                           @typescript-eslint/no-unused-vars
+  86:60  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  86:84  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  96:84  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\DataReviewDashboard.tsx
+   4:33  warning  'Filter' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+   4:59  warning  'CheckCircle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   4:72  warning  'Clock' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  38:9   error    Error: Cannot access variable before it is declared
+
+`loadOrders` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\DataReviewDashboard.tsx:38:9
+  36 |
+  37 |     useEffect(() => {
+> 38 |         loadOrders();
+     |         ^^^^^^^^^^ `loadOrders` accessed before it is declared
+  39 |     }, []);
+  40 |
+  41 |     const loadOrders = () => {
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\DataReviewDashboard.tsx:41:5
+  39 |     }, []);
+  40 |
+> 41 |     const loadOrders = () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         fetch('/api/orders')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |             .then(res => res.json())
+     ÔÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 51 |             });
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |     };
+     | ^^^^^^^ `loadOrders` is declared here
+  53 |
+  54 |     const filteredOrders = orders.filter(order => {
+  55 |         const matchesSearch =  react-hooks/immutability
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\DeliveryDashboard.tsx
+  150:61  warning  'idx' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\DeliveryForm.tsx
+  4:10  warning  'Upload' is defined but never used  @typescript-eslint/no-unused-vars
+  4:24  warning  'Minus' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\RepairEstimateForm.tsx
+   26:50  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  127:81  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\RugDetailForm.tsx
+  11:19  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:58  warning  'initialData' is defined but never used   @typescript-eslint/no-unused-vars
+  36:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\AhmedBassiouny\.gemini\antigravity\scratch\carpet_cleaning_system\web_app\src\components\SignaturePad.tsx
+  13:12  warning  'isEmpty' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 32 problems (23 errors, 9 warnings)
+

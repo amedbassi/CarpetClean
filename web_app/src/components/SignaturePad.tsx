@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Eraser } from 'lucide-react';
 
@@ -10,20 +10,16 @@ interface SignaturePadProps {
 
 export default function SignaturePad({ onEnd }: SignaturePadProps) {
     const sigCanvas = useRef<SignatureCanvas>(null);
-    const [isEmpty, setIsEmpty] = useState(true);
 
     const clear = () => {
         sigCanvas.current?.clear();
-        setIsEmpty(true);
         onEnd(null);
     };
 
     const handleEnd = () => {
         if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-            setIsEmpty(false);
             onEnd(sigCanvas.current.toDataURL());
         } else {
-            setIsEmpty(true);
             onEnd(null);
         }
     };

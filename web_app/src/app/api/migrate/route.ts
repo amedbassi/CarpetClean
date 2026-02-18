@@ -63,9 +63,10 @@ export async function GET() {
                     },
                 });
                 migratedCount++;
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error(`Error migrating order ${orderData.id}:`, err);
-                errors.push(`${orderData.id}: ${err.message}`);
+                const message = err instanceof Error ? err.message : 'Unknown error';
+                errors.push(`${orderData.id}: ${message}`);
             }
         }
 
@@ -76,8 +77,9 @@ export async function GET() {
             skipped: skippedCount,
             errors: errors.length > 0 ? errors : undefined
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Migration-wide error:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ success: false, error: message }, { status: 500 });
     }
 }

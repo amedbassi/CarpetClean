@@ -29,7 +29,7 @@ export async function GET() {
         });
 
         return NextResponse.json(readyOrders);
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error fetching delivery-ready orders:', error);
         return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
     }

@@ -21,7 +21,15 @@ export async function POST(request: Request) {
                 requiresApproval: false,
                 approvalStatus: "not_needed",
                 items: {
-                    create: orderData.items.map((item: any) => ({
+                    create: orderData.items.map((item: {
+                        id: string;
+                        status?: string;
+                        length?: string;
+                        width?: string;
+                        material?: string;
+                        state?: string;
+                        photo?: string;
+                    }) => ({
                         id: item.id,
                         status: item.status || "pending",
                         length: item.length,
@@ -38,9 +46,10 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json({ success: true, message: 'Order saved', order: newOrder }, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error saving order:', error);
-        return NextResponse.json({ success: false, message: 'Failed to save order', details: error.message }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ success: false, message: 'Failed to save order', details: message }, { status: 500 });
     }
 }
 
@@ -55,8 +64,9 @@ export async function GET() {
             },
         });
         return NextResponse.json(orders);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching orders:', error);
-        return NextResponse.json({ error: 'Failed to fetch orders', details: error.message }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: 'Failed to fetch orders', details: message }, { status: 500 });
     }
 }

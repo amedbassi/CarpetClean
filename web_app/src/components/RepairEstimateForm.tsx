@@ -23,7 +23,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
         fetch(`/api/orders/${orderId}`)
             .then(res => res.json())
             .then(data => {
-                const item = data.items.find((i: any) => i.id === itemId);
+                const item = data.items.find((i: { id: string }) => i.id === itemId);
                 if (item) {
                     setFormData({
                         repairDescription: item.repairDescription || '',

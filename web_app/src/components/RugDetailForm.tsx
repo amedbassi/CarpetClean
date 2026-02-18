@@ -8,10 +8,16 @@ import { useRouter } from 'next/navigation';
 interface RugDetailFormProps {
     orderId: string;
     itemId: string;
-    initialData?: any;
+    initialData?: {
+        length?: string;
+        width?: string;
+        state?: string;
+        material?: string;
+        photo?: string | null;
+    };
 }
 
-export default function RugDetailForm({ orderId, itemId, initialData }: RugDetailFormProps) {
+export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
     const router = useRouter();
     const [formData, setFormData] = useState({
         length: '',
@@ -33,7 +39,7 @@ export default function RugDetailForm({ orderId, itemId, initialData }: RugDetai
                 if (!response.ok) throw new Error('Order not found');
                 const order = await response.json();
 
-                const item = order.items.find((i: any) => i.id === itemId);
+                const item = order.items.find((i: { id: string }) => i.id === itemId);
                 if (item) {
                     setFormData({
                         length: item.length || '',

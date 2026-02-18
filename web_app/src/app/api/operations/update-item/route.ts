@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({ success: true, message: 'Item updated', item: updatedItem });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error updating item:', error);
         return NextResponse.json({ success: false, message: 'Failed to update item' }, { status: 500 });
     }
