@@ -31,34 +31,25 @@ async function main() {
                     requiresApproval: false,
                     approvalStatus: "not_needed",
                     items: {
-                        create: orderData.items.map((item: {
-                            id: string;
-                            status?: string;
-                            length?: string;
-                            width?: string;
-                            material?: string;
-                            state?: string;
-                            photo?: string;
-                            cleaningCost?: number;
-                            repairEstimate?: { cost: number; description: string };
-                        }) => ({
+                        create: orderData.items.map((item: any) => ({
                             id: item.id,
                             status: item.status || "pending",
-                            length: item.length,
-                            width: item.width,
-                            material: item.material,
-                            state: item.state,
-                            photo: item.photo,
-                            cleaningCost: item.cleaningCost,
-                            repairCost: item.repairEstimate?.cost,
-                            repairDescription: item.repairEstimate?.description,
+                            length: item.length || '',
+                            width: item.width || '',
+                            material: item.material || '',
+                            state: item.state || '',
+                            photo: item.photo || '',
+                            cleaningCost: item.cleaningCost || 0,
+                            repairCost: item.repairEstimate?.cost || 0,
+                            repairDescription: item.repairEstimate?.description || '',
                         })),
                     },
                 },
             });
             console.log(`Migrated order: ${orderData.id}`);
-        } catch (error) {
-            console.error(`Failed to migrate order ${orderData.id}:`, error);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Unknown error';
+            console.error(`Failed to migrate order ${orderData.id}:`, message);
         }
     }
 
@@ -66,8 +57,8 @@ async function main() {
 }
 
 main()
-    .catch((e) => {
-        console.error(e);
+    .catch((error) => {
+        console.error(error);
         process.exit(1);
     })
     .finally(async () => {
