@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Order {
+  id               String       @id
+  createdAt        DateTime     @default(now())
+  clientName       String
+  phone            String?
+  email            String?
+  address          String?
+  signature        String?      // Base64 string
+  receipt          String?      // File path or placeholder
+  requiresApproval Boolean      @default(false)
+  approvalStatus   String       @default("not_needed") // not_needed, pending, approved, rejected
+  items            CarpetItem[]
+}
+
+model CarpetItem {
+  id                String
+  orderId           String
+  order             Order    @relation(fields: [orderId], references: [id])
+  status            String   @default("pending") // pending, measured, ready_for_delivery, delivered
+  length            String?
+  width             String?
+  material          String?
+  state             String?
+  photo             String?  // File path or placeholder
+  cleaningCost      Float?
+  repairCost        Float?
+  repairDescription String?
+  
+  @@id([orderId, id])
+}
