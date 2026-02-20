@@ -144,7 +144,13 @@ export default function DeliveryDashboard() {
                             {/* Status and Items Info */}
                             <div className="flex md:flex-col items-center md:items-end justify-between gap-1">
                                 <span className="text-xs text-gray-400 font-medium">
-                                    {new Date(order.createdAt).toISOString().slice(0, 10)}
+                                    {(() => {
+                                        const date = new Date(order.createdAt);
+                                        if (isNaN(date.getTime())) return 'Invalid Date';
+                                        return new Intl.DateTimeFormat('en-CH', {
+                                            timeZone: 'Europe/Zurich',
+                                        }).format(date);
+                                    })()}
                                 </span>
                                 <div className="flex -space-x-2">
                                     {order.items.map((item, idx) => (

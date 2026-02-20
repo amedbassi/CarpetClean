@@ -167,7 +167,13 @@ export default function OperationsDashboard() {
                                 )}
                             </div>
                             <span className="text-sm text-gray-500">
-                                {new Date(order.createdAt).toISOString().slice(0, 10)}
+                                {(() => {
+                                    const date = new Date(order.createdAt);
+                                    if (isNaN(date.getTime())) return 'Invalid Date';
+                                    return new Intl.DateTimeFormat('en-CH', {
+                                        timeZone: 'Europe/Zurich',
+                                    }).format(date);
+                                })()}
                             </span>
                         </div>
                         <div className="divide-y">
