@@ -166,7 +166,9 @@ export default function OperationsDashboard() {
                                     </span>
                                 )}
                             </div>
-                            <span className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</span>
+                            <span className="text-sm text-gray-500">
+                                {new Date(order.createdAt).toISOString().slice(0, 10)}
+                            </span>
                         </div>
                         <div className="divide-y">
                             {order.items.map(item => (

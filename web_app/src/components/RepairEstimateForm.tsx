@@ -86,8 +86,9 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Repair Description</label>
+                    <label htmlFor="repair-description" className="block text-sm font-medium text-gray-700">Repair Description</label>
                     <textarea
+                        id="repair-description"
                         required
                         rows={4}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 text-sm"
@@ -98,12 +99,13 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Estimated Repair Cost ($)</label>
+                    <label htmlFor="repair-cost" className="block text-sm font-medium text-gray-700">Estimated Repair Cost ($)</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 text-sm">$</span>
                         </div>
                         <input
+                            id="repair-cost"
                             type="number"
                             step="0.01"
                             required

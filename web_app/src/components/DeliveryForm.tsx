@@ -141,7 +141,7 @@ export default function DeliveryForm() {
                 <h3 className="text-lg font-medium text-gray-700">Client Details</h3>
 
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Client Name</label>
+                    <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">Client Name</label>
                     <input
                         type="text"
                         id="clientName"

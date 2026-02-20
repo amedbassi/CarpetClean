@@ -144,7 +144,7 @@ export default function DeliveryDashboard() {
                             {/* Status and Items Info */}
                             <div className="flex md:flex-col items-center md:items-end justify-between gap-1">
                                 <span className="text-xs text-gray-400 font-medium">
-                                    {new Date(order.createdAt).toLocaleDateString()}
+                                    {new Date(order.createdAt).toISOString().slice(0, 10)}
                                 </span>
                                 <div className="flex -space-x-2">
                                     {order.items.map((item, idx) => (
