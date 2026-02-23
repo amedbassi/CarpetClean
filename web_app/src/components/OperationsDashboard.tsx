@@ -77,11 +77,13 @@ export default function OperationsDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId,
-                    // Toggle the flag
-                    requiresApproval: !currentVal,
+                    // Toggle both approval flags
+                    requiresCleaningApproval: !currentVal,
+                    requiresRepairApproval: !currentVal,
                     // When turning approval ON, default to "pending" (client estimate approval needed)
                     // When turning approval OFF, mark as "not_needed"
-                    approvalStatus: !currentVal ? 'pending' : 'not_needed'
+                    cleaningApprovalStatus: !currentVal ? 'pending' : 'not_needed',
+                    repairApprovalStatus: !currentVal ? 'pending' : 'not_needed'
                 }),
             });
 

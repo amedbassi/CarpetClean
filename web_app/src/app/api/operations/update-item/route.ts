@@ -23,17 +23,29 @@ export async function POST(request: Request) {
             include: { items: true },
         });
 
-        if (order && order.requiresApproval && order.approvalStatus === 'not_needed') {
+        if (order && (order.requiresCleaningApproval || order.requiresRepairApproval)) {
             const allItemsMeasured = order.items.every(item =>
                 ['measured', 'cleaning_estimated', 'repair_estimated'].includes(item.status)
             );
 
-            // In a real app, you'd also check if repair estimates are done for worn/damaged items
+            // Update approval status to pending if all items are measured
             if (allItemsMeasured) {
-                await prisma.order.update({
-                    where: { id: orderId },
-                    data: { approvalStatus: 'pending' },
-                });
+                const updateData: any = {};
+                
+                if (order.requiresCleaningApproval && order.cleaningApprovalStatus === 'not_needed') {
+                    updateData.cleaningApprovalStatus = 'pending';
+                }
+                
+                if (order.requiresRepairApproval && order.repairApprovalStatus === 'not_needed') {
+                    updateData.repairApprovalStatus = 'pending';
+                }
+                
+                if (Object.keys(updateData).length > 0) {
+                    await prisma.order.update({
+                        where: { id: orderId },
+                        data: updateData,
+                    });
+                }
             }
         }
 
