@@ -179,8 +179,9 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                     {/* Dimensions */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Length (m)</label>
+                            <label htmlFor="rug-length" className="block text-sm font-medium text-gray-700">Length (m)</label>
                             <input
+                                id="rug-length"
                                 type="number"
                                 step="0.01"
                                 required
@@ -190,8 +191,9 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Width (m)</label>
+                            <label htmlFor="rug-width" className="block text-sm font-medium text-gray-700">Width (m)</label>
                             <input
+                                id="rug-width"
                                 type="number"
                                 step="0.01"
                                 required
@@ -204,8 +206,9 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
 
                     {/* Dropdowns */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">State / Condition</label>
+                        <label htmlFor="rug-state" className="block text-sm font-medium text-gray-700">State / Condition</label>
                         <select
+                            id="rug-state"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.state}
                             onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
@@ -219,8 +222,9 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Material / Type</label>
+                        <label htmlFor="rug-material" className="block text-sm font-medium text-gray-700">Material / Type</label>
                         <select
+                            id="rug-material"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.material}
                             onChange={e => setFormData(prev => ({ ...prev, material: e.target.value }))}
