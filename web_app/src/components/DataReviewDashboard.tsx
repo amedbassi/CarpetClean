@@ -36,7 +36,9 @@ export default function DataReviewDashboard() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [clientFilter, setClientFilter] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [showClientInfo, setShowClientInfo] = useState<string | null>(null);
 
     useEffect(() => {
         loadOrders();
@@ -62,17 +64,23 @@ export default function DataReviewDashboard() {
             order.client?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.client?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        if (statusFilter === 'all') return matchesSearch;
+        // Filter by client
+        const matchesClient = clientFilter === 'all' || order.client?.name === clientFilter;
+
+        if (statusFilter === 'all') return matchesSearch && matchesClient;
 
         // If filtering by approval status
         if (['pending_approval', 'approved'].includes(statusFilter)) {
             const approvalStatus = statusFilter === 'pending_approval' ? 'pending' : 'approved';
-            return matchesSearch && (order.cleaningApprovalStatus === approvalStatus || order.repairApprovalStatus === approvalStatus);
+            return matchesSearch && matchesClient && (order.cleaningApprovalStatus === approvalStatus || order.repairApprovalStatus === approvalStatus);
         }
 
         const hasStatus = order.items.some(item => item.status === statusFilter);
-        return matchesSearch && hasStatus;
+        return matchesSearch && matchesClient && hasStatus;
     });
+
+    // Get unique client names for filter dropdown
+    const uniqueClients = Array.from(new Set(orders.map(o => o.client?.name).filter(Boolean))) as string[];
 
     const exportToCSV = () => {
         const headers = ['Client', 'Order ID', 'Rug #', 'Item Status', 'Approval', 'Dimensions', 'Material', 'State', 'Cleaning Cost', 'Repair Cost', 'Total'];
@@ -182,6 +190,16 @@ export default function DataReviewDashboard() {
                     </div>
                     <div className="flex items-center space-x-2">
                         <select
+                            value={clientFilter}
+                            onChange={e => setClientFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        >
+                            <option value="all">All Clients</option>
+                            {uniqueClients.map(client => (
+                                <option key={client} value={client}>{client}</option>
+                            ))}
+                        </select>
+                        <select
                             value={statusFilter}
                             onChange={e => setStatusFilter(e.target.value)}
                             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
@@ -208,10 +226,31 @@ export default function DataReviewDashboard() {
                                         {clientOrders.reduce((sum, o) => sum + o.items.length, 0)} rug{clientOrders.reduce((sum, o) => sum + o.items.length, 0) > 1 ? 's' : ''}
                                     </p>
                                 </div>
-                                <div className="text-right text-sm opacity-70">
-                                    {clientOrders[0].client?.phone && <div>{clientOrders[0].client.phone}</div>}
+                                <div className="flex items-center space-x-4">
+                                    <div className="text-right text-sm opacity-70">
+                                        {clientOrders[0].client?.phone && <div>{clientOrders[0].client.phone}</div>}
+                                        {clientOrders[0].client?.email && <div className="text-xs">{clientOrders[0].client.email}</div>}
+                                    </div>
+                                    <button
+                                        onClick={() => setShowClientInfo(showClientInfo === clientName ? null : clientName)}
+                                        className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-xs font-medium transition"
+                                    >
+                                        {showClientInfo === clientName ? 'Hide' : 'Show'} Contact
+                                    </button>
                                 </div>
                             </div>
+                            {showClientInfo === clientName && clientOrders[0].client && (
+                                <div className="mt-4 pt-4 border-t border-white/20 grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span className="opacity-70">Phone:</span>
+                                        <p className="font-medium">{clientOrders[0].client.phone || 'Not provided'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="opacity-70">Email:</span>
+                                        <p className="font-medium text-xs">{clientOrders[0].client.email || 'Not provided'}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="divide-y">
