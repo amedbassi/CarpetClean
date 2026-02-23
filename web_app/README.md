@@ -58,6 +58,21 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000)
 
+## Clear Database
+
+To start with a clean database, run the SQL script in Supabase SQL Editor:
+
+```bash
+# Copy contents of clear-database.sql and run in Supabase SQL Editor
+```
+
+Or use the npm script (requires database connection):
+```bash
+npm run clear-db
+```
+
+See `CLEAN_START_GUIDE.md` for detailed instructions.
+
 ## Migration Notes
 
 The database was migrated from a flat order structure to a Client-based relational structure using `migration.sql`. The migration:
