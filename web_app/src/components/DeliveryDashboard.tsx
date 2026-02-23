@@ -11,8 +11,14 @@ interface CarpetItem {
 interface Order {
     id: string;
     createdAt: string;
-    clientName: string;
-    address: string;
+    client?: {
+        name: string;
+        street: string | null;
+        number: string | null;
+        postalCode: string | null;
+        city: string | null;
+        country: string | null;
+    };
     items: CarpetItem[];
 }
 
@@ -133,10 +139,12 @@ export default function DeliveryDashboard() {
                                             {order.items.length} items
                                         </span>
                                     </div>
-                                    <p className="font-semibold text-gray-700">{order.clientName}</p>
+                                    <p className="font-semibold text-gray-700">{order.client?.name || 'Unknown Client'}</p>
                                     <div className="flex items-center text-sm text-gray-500">
                                         <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
-                                        {order.address || "No address provided"}
+                                        {order.client?.street && order.client?.number 
+                                            ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
+                                            : "No address provided"}
                                     </div>
                                 </div>
                             </div>

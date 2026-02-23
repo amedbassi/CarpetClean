@@ -18,12 +18,16 @@ interface CarpetItem {
 interface Order {
     id: string;
     createdAt: string;
-    clientName: string;
-    phone?: string;
-    email?: string;
-    address?: string;
-    requiresApproval: boolean;
-    approvalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    client?: {
+        id: string;
+        name: string;
+        phone: string | null;
+        email: string | null;
+    };
+    requiresCleaningApproval: boolean;
+    cleaningApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    requiresRepairApproval: boolean;
+    repairApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
     items: CarpetItem[];
 }
 
@@ -54,16 +58,16 @@ export default function DataReviewDashboard() {
     const filteredOrders = orders.filter(order => {
         const matchesSearch =
             order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.email?.toLowerCase().includes(searchTerm.toLowerCase());
+            order.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.client?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.client?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
         if (statusFilter === 'all') return matchesSearch;
 
         // If filtering by approval status
         if (['pending_approval', 'approved'].includes(statusFilter)) {
             const approvalStatus = statusFilter === 'pending_approval' ? 'pending' : 'approved';
-            return matchesSearch && order.approvalStatus === approvalStatus;
+            return matchesSearch && (order.cleaningApprovalStatus === approvalStatus || order.repairApprovalStatus === approvalStatus);
         }
 
         const hasStatus = order.items.some(item => item.status === statusFilter);
@@ -79,11 +83,14 @@ export default function DataReviewDashboard() {
                 const cleaningCost = item.cleaningCost || 0;
                 const repairCost = item.repairCost || 0;
                 rows.push([
-                    order.clientName,
+                    order.client?.name || 'Unknown',
                     order.id,
                     item.id,
                     item.status || 'pending',
-                    order.requiresApproval ? order.approvalStatus : 'N/A',
+                    (order.requiresCleaningApproval || order.requiresRepairApproval) 
+                        ? (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 
+                           order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 'not_needed')
+                        : 'N/A',
                     item.length && item.width ? `${item.length}m × ${item.width}m` : '',
                     item.material || '',
                     item.state || '',
@@ -112,7 +119,7 @@ export default function DataReviewDashboard() {
     if (loading) return <div className="p-8 text-center">Loading data...</div>;
 
     const clientGroups = filteredOrders.reduce((acc, order) => {
-        const clientName = order.clientName;
+        const clientName = order.client?.name || 'Unknown Client';
         if (!acc[clientName]) {
             acc[clientName] = [];
         }
@@ -142,7 +149,8 @@ export default function DataReviewDashboard() {
                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
                     <h3 className="text-sm font-medium text-orange-600">Waiting Approval</h3>
                     <p className="text-3xl font-bold text-orange-800">
-                        {orders.filter(o => o.requiresApproval && o.approvalStatus === 'pending').length}
+                        {orders.filter(o => (o.requiresCleaningApproval || o.requiresRepairApproval) && 
+                                           (o.cleaningApprovalStatus === 'pending' || o.repairApprovalStatus === 'pending')).length}
                     </p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg border border-green-100">
@@ -201,7 +209,7 @@ export default function DataReviewDashboard() {
                                     </p>
                                 </div>
                                 <div className="text-right text-sm opacity-70">
-                                    {clientOrders[0].phone && <div>{clientOrders[0].phone}</div>}
+                                    {clientOrders[0].client?.phone && <div>{clientOrders[0].client.phone}</div>}
                                 </div>
                             </div>
                         </div>
@@ -212,15 +220,17 @@ export default function DataReviewDashboard() {
                                     <div className="px-6 py-3 bg-gray-100 border-b flex items-center justify-between">
                                         <div className="flex items-center space-x-4">
                                             <span className="font-mono font-bold text-gray-900">{order.id}</span>
-                                            {order.requiresApproval && (
+                                            {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                                 <div className="flex items-center space-x-2">
-                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${order.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' :
-                                                            order.approvalStatus === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                                                'bg-gray-100 text-gray-600'
-                                                        }`}>
-                                                        {order.approvalStatus}
+                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                                                        (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
+                                                        (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-gray-100 text-gray-600'
+                                                    }`}>
+                                                        {(order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'pending' :
+                                                         (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'}
                                                     </span>
-                                                    {order.approvalStatus === 'pending' && (
+                                                    {(order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') && (
                                                         <button
                                                             onClick={() => copyApprovalLink(order.id)}
                                                             className="text-blue-600 hover:text-blue-800 flex items-center text-[10px] font-bold"
@@ -320,10 +330,13 @@ export default function DataReviewDashboard() {
                         </div>
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div><span className="text-gray-500">Client:</span> {selectedOrder.clientName}</div>
+                                <div><span className="text-gray-500">Client:</span> {selectedOrder.client?.name || 'Unknown'}</div>
                                 <div className="text-right"><span className="text-gray-500">Date:</span> {new Date(selectedOrder.createdAt).toLocaleString()}</div>
                                 <div className="col-span-2 border-t pt-2 mt-2">
-                                    <span className="text-gray-500">Approval:</span> {selectedOrder.approvalStatus}
+                                    <span className="text-gray-500">Approval:</span> {
+                                        (selectedOrder.cleaningApprovalStatus === 'pending' || selectedOrder.repairApprovalStatus === 'pending') ? 'pending' :
+                                        (selectedOrder.cleaningApprovalStatus === 'approved' || selectedOrder.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'
+                                    }
                                 </div>
                             </div>
                             <div className="space-y-4">

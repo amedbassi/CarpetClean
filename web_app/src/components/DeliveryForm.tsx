@@ -1,27 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Upload, Plus, Minus, CheckCircle, Receipt, Trash2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Upload, Plus, Minus, CheckCircle, Receipt, Trash2, Search } from 'lucide-react';
 import SignaturePad from './SignaturePad';
 
 interface CarpetItem {
     id: string;
 }
 
+interface Client {
+    id: string;
+    name: string;
+    phone: string | null;
+    email: string | null;
+    street: string | null;
+    number: string | null;
+    postalCode: string | null;
+    city: string | null;
+    country: string | null;
+}
+
 export default function DeliveryForm() {
     const [formData, setFormData] = useState({
         id: '',
+        clientId: '',
         clientName: '',
         phone: '',
         email: '',
-        address: '',
-        items: [{ id: '1' }] as CarpetItem[], // Initialize with one item
+        street: '',
+        number: '',
+        postalCode: '',
+        city: '',
+        country: '',
+        items: [{ id: '1' }] as CarpetItem[],
         receipt: null as File | null,
         signature: null as string | null,
     });
     const [error, setError] = useState<string | null>(null);
-
     const [submitted, setSubmitted] = useState(false);
+    const [clients, setClients] = useState<Client[]>([]);
+    const [filteredClients, setFilteredClients] = useState<Client[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [isNewClient, setIsNewClient] = useState(true);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Fetch next sequential order ID
@@ -38,7 +59,63 @@ export default function DeliveryForm() {
                 console.error('Error fetching next order ID:', err);
                 setError('Failed to load Order ID. Please refresh.');
             });
-    }, []); // Empty dependency array - only run on mount
+
+        // Fetch existing clients
+        fetch('/api/clients')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setClients(data);
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching clients:', err);
+            });
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleClientNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFormData(prev => ({ ...prev, clientName: value, clientId: '' }));
+        setIsNewClient(true);
+
+        if (value.trim().length > 0) {
+            const filtered = clients.filter(client =>
+                client.name.toLowerCase().includes(value.toLowerCase())
+            );
+            setFilteredClients(filtered);
+            setShowDropdown(filtered.length > 0);
+        } else {
+            setShowDropdown(false);
+        }
+    };
+
+    const selectClient = (client: Client) => {
+        setFormData(prev => ({
+            ...prev,
+            clientId: client.id,
+            clientName: client.name,
+            phone: client.phone || '',
+            email: client.email || '',
+            street: client.street || '',
+            number: client.number || '',
+            postalCode: client.postalCode || '',
+            city: client.city || '',
+            country: client.country || '',
+        }));
+        setIsNewClient(false);
+        setShowDropdown(false);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -71,15 +148,45 @@ export default function DeliveryForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Save to local storage API
         try {
+            let clientId = formData.clientId;
+
+            // If new client, create client first
+            if (isNewClient || !clientId) {
+                const clientResponse = await fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.clientName,
+                        phone: formData.phone || null,
+                        email: formData.email || null,
+                        street: formData.street || null,
+                        number: formData.number || null,
+                        postalCode: formData.postalCode || null,
+                        city: formData.city || null,
+                        country: formData.country || null,
+                    }),
+                });
+
+                if (!clientResponse.ok) {
+                    const errorData = await clientResponse.json();
+                    throw new Error(errorData.message || 'Failed to create client');
+                }
+
+                const clientData = await clientResponse.json();
+                clientId = clientData.client.id;
+            }
+
+            // Create order
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...formData,
-                    // Mocking file upload for now, just sending name
+                    id: formData.id,
+                    clientId: clientId,
+                    signature: formData.signature,
                     receipt: formData.receipt ? formData.receipt.name : null,
+                    items: formData.items,
                 }),
             });
 
@@ -88,7 +195,7 @@ export default function DeliveryForm() {
             setSubmitted(true);
         } catch (error) {
             console.error(error);
-            alert('Error saving order');
+            alert(`Error saving order: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     };
 
@@ -111,14 +218,20 @@ export default function DeliveryForm() {
                         setSubmitted(false);
                         setFormData({
                             id: '',
+                            clientId: '',
                             clientName: '',
                             phone: '',
                             email: '',
-                            address: '',
+                            street: '',
+                            number: '',
+                            postalCode: '',
+                            city: '',
+                            country: '',
                             items: [{ id: '1' }],
                             receipt: null,
                             signature: null,
                         });
+                        setIsNewClient(true);
                     }}
                     className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
                 >
@@ -140,18 +253,51 @@ export default function DeliveryForm() {
             <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-700">Client Details</h3>
 
-                <div>
-                    <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">Client Name</label>
-                    <input
-                        type="text"
-                        id="clientName"
-                        name="clientName"
-                        required
-                        value={formData.clientName}
-                        onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="John Doe"
-                    />
+                <div className="relative" ref={dropdownRef}>
+                    <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">
+                        Client Name {!isNewClient && <span className="text-green-600 text-xs">(Existing Client)</span>}
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            id="clientName"
+                            name="clientName"
+                            required
+                            value={formData.clientName}
+                            onChange={handleClientNameChange}
+                            onFocus={() => {
+                                if (formData.clientName && filteredClients.length > 0) {
+                                    setShowDropdown(true);
+                                }
+                            }}
+                            className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Start typing client name..."
+                            autoComplete="off"
+                        />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 mt-0.5" />
+                    </div>
+                    
+                    {showDropdown && filteredClients.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {filteredClients.map(client => (
+                                <button
+                                    key={client.id}
+                                    type="button"
+                                    onClick={() => selectClient(client)}
+                                    className="w-full text-left px-4 py-2 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b last:border-b-0"
+                                >
+                                    <div className="font-medium text-gray-900">{client.name}</div>
+                                    {(client.phone || client.email) && (
+                                        <div className="text-sm text-gray-500">
+                                            {client.phone && <span>{client.phone}</span>}
+                                            {client.phone && client.email && <span> • </span>}
+                                            {client.email && <span>{client.email}</span>}
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div>
@@ -163,7 +309,7 @@ export default function DeliveryForm() {
                         value={formData.phone}
                         onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="+1 234 567 890 (Optional)"
+                        placeholder="+41 79 123 4567 (Optional)"
                     />
                 </div>
 
@@ -176,20 +322,74 @@ export default function DeliveryForm() {
                         value={formData.email}
                         onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="john@example.com (Optional)"
+                        placeholder="client@example.com (Optional)"
                     />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="street" className="block text-sm font-medium text-gray-700">Street</label>
+                        <input
+                            type="text"
+                            id="street"
+                            name="street"
+                            value={formData.street}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Main Street"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="number" className="block text-sm font-medium text-gray-700">Number</label>
+                        <input
+                            type="text"
+                            id="number"
+                            name="number"
+                            value={formData.number}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="123"
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">Postal Code</label>
+                        <input
+                            type="text"
+                            id="postalCode"
+                            name="postalCode"
+                            value={formData.postalCode}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="8000"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Zürich"
+                        />
+                    </div>
+                </div>
+
                 <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-                    <textarea
-                        id="address"
-                        name="address"
-                        rows={3}
-                        value={formData.address}
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
+                    <input
+                        type="text"
+                        id="country"
+                        name="country"
+                        value={formData.country}
                         onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="123 Main St, Apt 4B (Optional)"
+                        placeholder="Switzerland"
                     />
                 </div>
             </div>

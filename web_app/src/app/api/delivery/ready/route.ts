@@ -7,6 +7,7 @@ export async function GET() {
         const orders = await prisma.order.findMany({
             include: {
                 items: true,
+                client: true,
             },
             orderBy: {
                 createdAt: 'desc',
@@ -31,6 +32,6 @@ export async function GET() {
         return NextResponse.json(readyOrders);
     } catch (error: unknown) {
         console.error('Error fetching delivery-ready orders:', error);
-        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+        return NextResponse.json([], { status: 200 });
     }
 }

@@ -12,10 +12,17 @@ interface CarpetItem {
 interface Order {
     id: string;
     createdAt: string;
-    clientName: string;
+    client?: {
+        id: string;
+        name: string;
+        phone: string | null;
+        email: string | null;
+    };
     items: CarpetItem[];
-    requiresApproval: boolean;
-    approvalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    requiresCleaningApproval: boolean;
+    cleaningApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    requiresRepairApproval: boolean;
+    repairApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
 }
 
 export default function OperationsDashboard() {
@@ -26,11 +33,12 @@ export default function OperationsDashboard() {
         fetch('/api/orders')
             .then(res => res.json())
             .then(data => {
-                setOrders(data);
+                setOrders(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
             .catch(err => {
                 console.error(err);
+                setOrders([]);
                 setLoading(false);
             });
     };
@@ -146,23 +154,25 @@ export default function OperationsDashboard() {
                             <div className="flex items-center space-x-4">
                                 <div>
                                     <span className="font-mono font-bold text-gray-700">{order.id}</span>
-                                    <span className="text-sm text-gray-500 ml-3">{order.clientName}</span>
+                                    <span className="text-sm text-gray-500 ml-3">{order.client?.name || 'Unknown Client'}</span>
                                 </div>
                                 <label className="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-md border text-xs shadow-sm hover:bg-gray-50">
                                     <input
                                         type="checkbox"
-                                        checked={order.requiresApproval}
-                                        onChange={() => toggleApprovalRequired(order.id, order.requiresApproval)}
+                                        checked={order.requiresCleaningApproval || order.requiresRepairApproval}
+                                        onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval || order.requiresRepairApproval)}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="font-medium text-gray-700">Requires Client Approval</span>
                                 </label>
-                                {order.requiresApproval && (
-                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${order.approvalStatus === 'approved' ? 'bg-green-100 text-green-700' :
-                                            order.approvalStatus === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                                'bg-gray-100 text-gray-600'
-                                        }`}>
-                                        {order.approvalStatus.replace('_', ' ')}
+                                {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
+                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                                        (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
+                                        (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
+                                        'bg-gray-100 text-gray-600'
+                                    }`}>
+                                        {order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 
+                                         order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 'not needed'}
                                     </span>
                                 )}
                             </div>
@@ -199,8 +209,11 @@ export default function OperationsDashboard() {
                                         {item.status === 'measured' && (
                                             <button
                                                 onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
-                                                disabled={order.requiresApproval && order.approvalStatus !== 'approved'}
-                                                className={`px-3 py-1.5 text-white text-xs font-medium rounded transition flex items-center ${order.requiresApproval && order.approvalStatus !== 'approved'
+                                                disabled={(order.requiresCleaningApproval || order.requiresRepairApproval) && 
+                                                         (order.cleaningApprovalStatus !== 'approved' && order.repairApprovalStatus !== 'approved')}
+                                                className={`px-3 py-1.5 text-white text-xs font-medium rounded transition flex items-center ${
+                                                    (order.requiresCleaningApproval || order.requiresRepairApproval) && 
+                                                    (order.cleaningApprovalStatus !== 'approved' && order.repairApprovalStatus !== 'approved')
                                                         ? 'bg-gray-400 cursor-not-allowed'
                                                         : 'bg-green-600 hover:bg-green-700'
                                                     }`}
@@ -209,7 +222,8 @@ export default function OperationsDashboard() {
                                                 Mark as Ready
                                             </button>
                                         )}
-                                        {order.requiresApproval && order.approvalStatus === 'pending' && (
+                                        {(order.requiresCleaningApproval || order.requiresRepairApproval) && 
+                                         (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') && (
                                             <p className="text-[10px] text-orange-600 italic mt-1">
                                                 * Waiting for client approval of estimate
                                             </p>
