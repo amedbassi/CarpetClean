@@ -15,7 +15,9 @@ interface CarpetItem {
 interface Order {
     id: string;
     createdAt: string;
-    clientName: string;
+    client?: {
+        name: string;
+    };
     items: CarpetItem[];
 }
 
@@ -45,7 +47,7 @@ export default function RepairDashboard() {
                 ['Worn', 'Damaged'].includes(item.state || '') ||
                 ['repair_needed', 'repair_estimated'].includes(item.status || '')
             )
-            .map(item => ({ ...item, orderId: order.id, clientName: order.clientName }))
+            .map(item => ({ ...item, orderId: order.id, clientName: order.client?.name || 'Unknown' }))
     );
 
     return (

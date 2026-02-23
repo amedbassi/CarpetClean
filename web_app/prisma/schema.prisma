@@ -8,18 +8,40 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Client {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  name       String
+  phone      String?
+  email      String?
+  street     String?
+  number     String?
+  postalCode String?
+  city       String?
+  country    String?
+  orders     Order[]
+
+  @@unique([email], map: "Client_email_key")
+  @@index([name])
+  @@index([email])
+  @@index([phone])
+}
+
 model Order {
-  id               String       @id
-  createdAt        DateTime     @default(now())
-  clientName       String
-  phone            String?
-  email            String?
-  address          String?
-  signature        String?
-  receipt          String?
-  requiresApproval Boolean      @default(false)
-  approvalStatus   String       @default("not_needed")
-  items            CarpetItem[]
+  id                      String       @id
+  createdAt               DateTime     @default(now())
+  clientId                String
+  client                  Client       @relation(fields: [clientId], references: [id])
+  signature               String?
+  receipt                 String?
+  requiresCleaningApproval Boolean     @default(false)
+  cleaningApprovalStatus  String       @default("not_needed")
+  requiresRepairApproval  Boolean      @default(false)
+  repairApprovalStatus    String       @default("not_needed")
+  items                   CarpetItem[]
+
+  @@index([clientId])
 }
 
 model CarpetItem {
