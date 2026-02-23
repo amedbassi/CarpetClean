@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Upload, Plus, Minus, CheckCircle, Receipt, Trash2, Search } from 'lucide-react';
+import { Plus, CheckCircle, Receipt, Trash2, Search } from 'lucide-react';
 import SignaturePad from './SignaturePad';
 
 interface CarpetItem {

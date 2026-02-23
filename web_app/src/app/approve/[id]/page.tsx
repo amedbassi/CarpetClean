@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { CheckCircle, AlertCircle, ShieldCheck, CreditCard, Ruler, Hammer } from 'lucide-react';
+import { CheckCircle, AlertCircle, ShieldCheck, Ruler, Hammer } from 'lucide-react';
 
 interface CarpetItem {
     id: string;
@@ -91,7 +91,7 @@ export default function ClientApprovalPage() {
             <div className="bg-white p-8 rounded-xl shadow-sm border border-red-100 max-w-md w-full text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
                 <h2 className="text-xl font-bold text-gray-800">Estimate Not Found</h2>
-                <p className="text-gray-600 mt-2">We couldn't find the estimate you're looking for. Please contact our support team.</p>
+                <p className="text-gray-600 mt-2">We couldn&apos;t find the estimate you&apos;re looking for. Please contact our support team.</p>
             </div>
         </div>
     );
@@ -101,7 +101,7 @@ export default function ClientApprovalPage() {
             <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100 max-w-md w-full text-center">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
                 <h2 className="text-xl font-bold text-gray-800">Estimate Approved!</h2>
-                <p className="text-gray-600 mt-2">Thank you, {order.client.name}. We've received your approval and will proceed with the work immediately.</p>
+                <p className="text-gray-600 mt-2">Thank you, {order.client.name}. We&apos;ve received your approval and will proceed with the work immediately.</p>
                 <div className="mt-8 pt-6 border-t">
                     <p className="text-sm text-gray-500">A confirmation has been sent to our operations team.</p>
                 </div>

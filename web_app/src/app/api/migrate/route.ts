@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
 // Migration route - disabled after SQL migration completed
+// Data migration was completed via SQL script in migration.sql
 
 export async function GET() {
-    // Migration already completed via SQL script
-    // This route is disabled to prevent conflicts
     return NextResponse.json({ 
-        message: 'Migration route disabled. Data migration was completed via SQL script.' 
+        message: 'Migration route disabled. Data migration was completed via SQL script.',
+        status: 'completed'
     });
 }

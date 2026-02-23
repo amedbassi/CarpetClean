@@ -126,7 +126,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                         Save & Set Estimated
                     </button>
                     <p className="text-[10px] text-center text-gray-400 mt-3 italic">
-                        Once saved, this estimate will be included in the client's approval link.
+                        Once saved, this estimate will be included in the client&apos;s approval link.
                     </p>
                 </div>
             </form>

@@ -1,59 +1,15 @@
+// DEPRECATED: This migration script is for the OLD schema (before Client table)
+// Migration to new Client-based schema was completed via migration.sql
+// This file is kept for reference only and should not be run
+
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    const jsonPath = path.join(process.cwd(), 'data', 'orders.json');
-    if (!fs.existsSync(jsonPath)) {
-        console.log('No orders.json found. Skipping migration.');
-        return;
-    }
-
-    const data = fs.readFileSync(jsonPath, 'utf8');
-    const orders = JSON.parse(data);
-
-    console.log(`Migrating ${orders.length} orders...`);
-
-    for (const orderData of orders) {
-        try {
-            await prisma.order.create({
-                data: {
-                    id: orderData.id,
-                    createdAt: new Date(orderData.createdAt),
-                    clientName: orderData.clientName,
-                    phone: orderData.phone,
-                    email: orderData.email,
-                    address: orderData.address,
-                    signature: orderData.signature,
-                    receipt: orderData.receipt,
-                    requiresApproval: false,
-                    approvalStatus: "not_needed",
-                    items: {
-                        create: orderData.items.map((item: any) => ({
-                            id: item.id,
-                            status: item.status || "pending",
-                            length: item.length || '',
-                            width: item.width || '',
-                            material: item.material || '',
-                            state: item.state || '',
-                            photo: item.photo || '',
-                            cleaningCost: item.cleaningCost || 0,
-                            repairCost: item.repairEstimate?.cost || 0,
-                            repairDescription: item.repairEstimate?.description || '',
-                        })),
-                    },
-                },
-            });
-            console.log(`Migrated order: ${orderData.id}`);
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Unknown error';
-            console.error(`Failed to migrate order ${orderData.id}:`, message);
-        }
-    }
-
-    console.log('Migration completed.');
+    console.log('This migration script is deprecated.');
+    console.log('Migration to Client-based schema was completed via migration.sql');
+    console.log('Please do not run this script.');
 }
 
 main()

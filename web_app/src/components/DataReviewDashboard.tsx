@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Eye, Download, Filter, Link as LinkIcon, CheckCircle, Clock } from 'lucide-react';
+import { Search, Eye, Download, LinkIcon } from 'lucide-react';
 
 interface CarpetItem {
     id: string;
@@ -40,10 +40,6 @@ export default function DataReviewDashboard() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [showClientInfo, setShowClientInfo] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadOrders();
-    }, []);
-
     const loadOrders = () => {
         fetch('/api/orders')
             .then(res => res.json())
@@ -56,6 +52,10 @@ export default function DataReviewDashboard() {
                 setLoading(false);
             });
     };
+
+    useEffect(() => {
+        loadOrders();
+    }, []);
 
     const filteredOrders = orders.filter(order => {
         const matchesSearch =
