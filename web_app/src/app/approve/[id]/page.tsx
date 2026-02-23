@@ -18,9 +18,12 @@ interface CarpetItem {
 
 interface Order {
     id: string;
-    clientName: string;
+    client: {
+        name: string;
+    };
     items: CarpetItem[];
-    approvalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    cleaningApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
+    repairApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
 }
 
 export default function ClientApprovalPage() {
@@ -51,13 +54,18 @@ export default function ClientApprovalPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId: id,
-                    approvalStatus: status,
+                    cleaningApprovalStatus: status,
+                    repairApprovalStatus: status,
                 }),
             });
 
             if (response.ok) {
                 setSubmitted(true);
-                setOrder(prev => prev ? { ...prev, approvalStatus: status } : null);
+                setOrder(prev => prev ? { 
+                    ...prev, 
+                    cleaningApprovalStatus: status,
+                    repairApprovalStatus: status 
+                } : null);
             } else {
                 alert('Submission failed. Please try again.');
             }
@@ -88,12 +96,12 @@ export default function ClientApprovalPage() {
         </div>
     );
 
-    if (submitted || order.approvalStatus === 'approved') return (
+    if (submitted || order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100 max-w-md w-full text-center">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
                 <h2 className="text-xl font-bold text-gray-800">Estimate Approved!</h2>
-                <p className="text-gray-600 mt-2">Thank you, {order.clientName}. We've received your approval and will proceed with the work immediately.</p>
+                <p className="text-gray-600 mt-2">Thank you, {order.client.name}. We've received your approval and will proceed with the work immediately.</p>
                 <div className="mt-8 pt-6 border-t">
                     <p className="text-sm text-gray-500">A confirmation has been sent to our operations team.</p>
                 </div>
@@ -117,7 +125,7 @@ export default function ClientApprovalPage() {
             <div className="max-w-xl mx-auto -mt-4 px-4">
                 <div className="bg-white rounded-xl shadow-lg border p-6 mb-6">
                     <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Client Details</h2>
-                    <p className="text-gray-700 font-medium">{order.clientName}</p>
+                    <p className="text-gray-700 font-medium">{order.client.name}</p>
                     <p className="text-sm text-gray-500">We have completed the inspection of your rugs and generated the following estimate for your approval.</p>
                 </div>
 

@@ -34,30 +34,49 @@ export async function GET() {
 
                 const clientName = orderData.clientName || orderData.name || 'Unknown Client';
 
+                // Find or create client
+                let client = await prisma.client.findFirst({
+                    where: { name: clientName }
+                });
+
+                if (!client) {
+                    client = await prisma.client.create({
+                        data: {
+                            name: clientName,
+                            phone: orderData.phone || null,
+                            email: orderData.email || null,
+                            street: null,
+                            number: null,
+                            postalCode: null,
+                            city: null,
+                            country: null,
+                        }
+                    });
+                }
+
                 await prisma.order.create({
                     data: {
                         id: orderData.id,
-                        clientName: clientName,
-                        phone: orderData.phone || '',
-                        email: orderData.email || '',
-                        address: orderData.address || '',
-                        signature: orderData.signature || '',
-                        receipt: orderData.receipt || '',
+                        clientId: client.id,
+                        signature: orderData.signature || null,
+                        receipt: orderData.receipt || null,
                         createdAt: new Date(orderData.createdAt || Date.now()),
-                        requiresApproval: orderData.requiresApproval || false,
-                        approvalStatus: orderData.approvalStatus || 'not_needed',
+                        requiresCleaningApproval: orderData.requiresApproval || false,
+                        cleaningApprovalStatus: orderData.approvalStatus || 'not_needed',
+                        requiresRepairApproval: false,
+                        repairApprovalStatus: 'not_needed',
                         items: {
                             create: (orderData.items || []).map((item: any) => ({
                                 id: item.id,
                                 status: item.status || 'pending',
-                                length: item.length || '',
-                                width: item.width || '',
-                                material: item.material || '',
-                                state: item.state || '',
-                                photo: item.photo || '',
-                                cleaningCost: item.cleaningCost || 0,
-                                repairCost: item.repairCost || (item.repairEstimate?.cost) || 0,
-                                repairDescription: item.repairDescription || (item.repairEstimate?.description) || '',
+                                length: item.length || null,
+                                width: item.width || null,
+                                material: item.material || null,
+                                state: item.state || null,
+                                photo: item.photo || null,
+                                cleaningCost: item.cleaningCost || null,
+                                repairCost: item.repairCost || (item.repairEstimate?.cost) || null,
+                                repairDescription: item.repairDescription || (item.repairEstimate?.description) || null,
                             })),
                         },
                     },
