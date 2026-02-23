@@ -2,22 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Ruler, CheckCircle, Package, Truck } from 'lucide-react';
+import { Ruler, CheckCircle, Package, Truck, Mail, Edit } from 'lucide-react';
 
 interface CarpetItem {
     id: string;
     status: string;
 }
 
+interface Client {
+    id: string;
+    name: string;
+    phone: string | null;
+    email: string | null;
+    street: string | null;
+    number: string | null;
+    postalCode: string | null;
+    city: string | null;
+    country: string | null;
+}
+
 interface Order {
     id: string;
     createdAt: string;
-    client?: {
-        id: string;
-        name: string;
-        phone: string | null;
-        email: string | null;
-    };
+    client?: Client;
     items: CarpetItem[];
     requiresCleaningApproval: boolean;
     cleaningApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
@@ -28,6 +35,8 @@ interface Order {
 export default function OperationsDashboard() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [editingClient, setEditingClient] = useState<Client | null>(null);
+    const [clientForm, setClientForm] = useState<Client | null>(null);
 
     const loadOrders = () => {
         fetch('/api/orders')
@@ -92,6 +101,56 @@ export default function OperationsDashboard() {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const sendApprovalRequest = async (order: Order) => {
+        // Check if all items are measured (estimate is ready)
+        const allMeasured = order.items.every(item => item.status === 'measured');
+        if (!allMeasured) {
+            alert('All carpets must be measured before sending the cleaning estimate for approval.');
+            return;
+        }
+
+        // Validate client has contact info
+        if (!order.client?.email && !order.client?.phone) {
+            alert('Client must have email or phone number to send the cleaning estimate. Please update client information.');
+            if (order.client) {
+                setEditingClient(order.client);
+                setClientForm(order.client);
+            }
+            return;
+        }
+
+        const approvalLink = `${window.location.origin}/approve/${order.id}`;
+        
+        // Copy link to clipboard
+        navigator.clipboard.writeText(approvalLink);
+        
+        alert(`Cleaning estimate approval link copied to clipboard!\n\nSend this link to ${order.client.name} to approve the cleaning estimate:\n${approvalLink}\n\nContact Info:\nEmail: ${order.client.email || 'Not provided'}\nPhone: ${order.client.phone || 'Not provided'}`);
+    };
+
+    const saveClientInfo = async () => {
+        if (!clientForm) return;
+
+        try {
+            const response = await fetch(`/api/clients/${clientForm.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(clientForm),
+            });
+
+            if (response.ok) {
+                setEditingClient(null);
+                setClientForm(null);
+                loadOrders();
+                alert('Client information updated successfully!');
+            } else {
+                alert('Failed to update client information');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error updating client information');
         }
     };
 
@@ -168,14 +227,37 @@ export default function OperationsDashboard() {
                                     <span className="font-medium text-gray-700">Requires Client Approval</span>
                                 </label>
                                 {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
-                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                                        (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
-                                        (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
-                                        'bg-gray-100 text-gray-600'
-                                    }`}>
-                                        {order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 
-                                         order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 'not needed'}
-                                    </span>
+                                    <>
+                                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                                            (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
+                                            (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
+                                            'bg-gray-100 text-gray-600'
+                                        }`}>
+                                            {order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 
+                                             order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 'not needed'}
+                                        </span>
+                                        
+                                        <button
+                                            onClick={() => sendApprovalRequest(order)}
+                                            className="flex items-center text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                        >
+                                            <Mail className="w-3 h-3 mr-1" />
+                                            Send Approval
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => {
+                                                if (order.client) {
+                                                    setEditingClient(order.client);
+                                                    setClientForm(order.client);
+                                                }
+                                            }}
+                                            className="flex items-center text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
+                                        >
+                                            <Edit className="w-3 h-3 mr-1" />
+                                            Edit Client
+                                        </button>
+                                    </>
                                 )}
                             </div>
                             <span className="text-sm text-gray-500">
@@ -249,6 +331,117 @@ export default function OperationsDashboard() {
                     <div className="text-center py-12 text-gray-500">No orders found.</div>
                 )}
             </div>
+
+            {/* Edit Client Modal */}
+            {editingClient && clientForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setEditingClient(null)}>
+                    <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-bold mb-4">Edit Client Information</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <input
+                                    type="text"
+                                    value={clientForm.name}
+                                    onChange={e => setClientForm({...clientForm, name: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                                <input
+                                    type="tel"
+                                    value={clientForm.phone || ''}
+                                    onChange={e => setClientForm({...clientForm, phone: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <input
+                                    type="email"
+                                    value={clientForm.email || ''}
+                                    onChange={e => setClientForm({...clientForm, email: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Street</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.street || ''}
+                                        onChange={e => setClientForm({...clientForm, street: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Number</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.number || ''}
+                                        onChange={e => setClientForm({...clientForm, number: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.postalCode || ''}
+                                        onChange={e => setClientForm({...clientForm, postalCode: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">City</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.city || ''}
+                                        onChange={e => setClientForm({...clientForm, city: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Country</label>
+                                <input
+                                    type="text"
+                                    value={clientForm.country || ''}
+                                    onChange={e => setClientForm({...clientForm, country: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex space-x-3 mt-6">
+                            <button
+                                onClick={saveClientInfo}
+                                className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditingClient(null);
+                                    setClientForm(null);
+                                }}
+                                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
