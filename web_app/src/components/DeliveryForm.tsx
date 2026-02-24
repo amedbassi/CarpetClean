@@ -44,8 +44,7 @@ export default function DeliveryForm() {
     const [isNewClient, setIsNewClient] = useState(true);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        // Fetch next sequential order ID
+    const fetchNextOrderId = () => {
         fetch('/api/orders/next-id')
             .then(res => res.json())
             .then(data => {
@@ -59,6 +58,11 @@ export default function DeliveryForm() {
                 console.error('Error fetching next order ID:', err);
                 setError('Failed to load Order ID. Please refresh.');
             });
+    };
+
+    useEffect(() => {
+        // Fetch next sequential order ID
+        fetchNextOrderId();
 
         // Fetch existing clients
         fetch('/api/clients')
@@ -232,6 +236,7 @@ export default function DeliveryForm() {
                             signature: null,
                         });
                         setIsNewClient(true);
+                        fetchNextOrderId();
                     }}
                     className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
                 >
