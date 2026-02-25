@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, Eye, Download, LinkIcon, User } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Search, Eye, Download, LinkIcon, User, BarChart3, Clock, CheckCircle2 } from 'lucide-react';
 
 interface CarpetItem {
     id: string;
@@ -58,6 +58,33 @@ export default function DataReviewDashboard() {
         loadOrders();
     }, []);
 
+    // Memoized Analytics (Pipeline and Key Accounts)
+    const analytics = useMemo(() => {
+        const totalItems = orders.flatMap(o => o.items);
+
+        const statusCounts = totalItems.reduce((acc, item) => {
+            acc[item.status] = (acc[item.status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const clientRevenue = orders.reduce((acc, order) => {
+            const name = order.client?.name || 'Unknown';
+            const value = order.items.reduce((sum, i) => sum + (i.cleaningCost || 0) + (i.repairCost || 0), 0);
+            acc[name] = (acc[name] || 0) + value;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const topClients = Object.entries(clientRevenue)
+            .sort(([, a], [, b]) => b - a)
+            .slice(0, 5);
+
+        return {
+            statusCounts,
+            topClients,
+            totalItemsCount: totalItems.length
+        };
+    }, [orders]);
+
     const filteredOrders = orders.filter(order => {
         const matchesSearch =
             order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,12 +92,10 @@ export default function DataReviewDashboard() {
             order.client?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.client?.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        // Filter by client
         const matchesClient = clientFilter === 'all' || order.client?.name === clientFilter;
 
         if (statusFilter === 'all') return matchesSearch && matchesClient;
 
-        // If filtering by approval status
         if (['pending_approval', 'approved'].includes(statusFilter)) {
             const approvalStatus = statusFilter === 'pending_approval' ? 'pending' : 'approved';
             return matchesSearch && matchesClient && (order.cleaningApprovalStatus === approvalStatus || order.repairApprovalStatus === approvalStatus);
@@ -80,7 +105,6 @@ export default function DataReviewDashboard() {
         return matchesSearch && matchesClient && hasStatus;
     });
 
-    // Get unique client names for filter dropdown
     const uniqueClients = Array.from(new Set(orders.map(o => o.client?.name).filter(Boolean))) as string[];
 
     const exportToCSV = () => {
@@ -130,9 +154,7 @@ export default function DataReviewDashboard() {
 
     const clientGroups = filteredOrders.reduce((acc, order) => {
         const clientName = order.client?.name || 'Unknown Client';
-        if (!acc[clientName]) {
-            acc[clientName] = [];
-        }
+        if (!acc[clientName]) acc[clientName] = [];
         acc[clientName].push(order);
         return acc;
     }, {} as Record<string, Order[]>);
@@ -140,7 +162,7 @@ export default function DataReviewDashboard() {
     return (
         <div className="max-w-7xl mx-auto p-4 space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800">Data Review Dashboard</h2>
+                <h2 className="text-2xl font-bold text-gray-800">Business Dashboard</h2>
                 <button
                     onClick={exportToCSV}
                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
@@ -150,34 +172,64 @@ export default function DataReviewDashboard() {
                 </button>
             </div>
 
-            {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <h3 className="text-sm font-medium text-blue-600">Total Orders</h3>
-                    <p className="text-3xl font-bold text-blue-800">{orders.length}</p>
+            {/* Managerial Insights (Replaced Old Statistics) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Operations Pipeline */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4 text-blue-600" />
+                            Operations Pipeline
+                        </h3>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase">{analytics.totalItemsCount} Total Items</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                        {['pending', 'cleaning', 'cleaned', 'ready_for_delivery', 'delivered'].map(status => {
+                            const count = analytics.statusCounts[status] || 0;
+                            const percentage = (count / analytics.totalItemsCount) * 100;
+                            const colorClass =
+                                status === 'delivered' ? 'bg-gray-200' :
+                                    status === 'ready_for_delivery' ? 'bg-green-500' :
+                                        status === 'cleaning' ? 'bg-blue-500' :
+                                            status === 'cleaned' ? 'bg-cyan-500' : 'bg-yellow-400';
+
+                            return (
+                                <div key={status} className="space-y-1">
+                                    <div className="flex justify-between text-[10px] font-bold uppercase">
+                                        <span className="text-gray-500">{status.replace(/_/g, ' ')}</span>
+                                        <span className="text-gray-900">{count} ({percentage.toFixed(0)}%)</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-50 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full ${colorClass} transition-all duration-1000`}
+                                            style={{ width: `${percentage}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                    <h3 className="text-sm font-medium text-orange-600">Waiting Approval</h3>
-                    <p className="text-3xl font-bold text-orange-800">
-                        {orders.filter(o => (o.requiresCleaningApproval || o.requiresRepairApproval) &&
-                            (o.cleaningApprovalStatus === 'pending' || o.repairApprovalStatus === 'pending')).length}
-                    </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                    <h3 className="text-sm font-medium text-green-600">Total Revenue</h3>
-                    <p className="text-3xl font-bold text-green-800">
-                        ${orders.flatMap(o => o.items).reduce((sum, i) => sum + (i.cleaningCost || 0) + (i.repairCost || 0), 0).toFixed(0)}
-                    </p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                    <h3 className="text-sm font-medium text-purple-600">Items Delivered</h3>
-                    <p className="text-3xl font-bold text-purple-800">
-                        {orders.flatMap(o => o.items).filter(i => i.status === 'delivered').length}
-                    </p>
+
+                {/* Key Account Heatmap */}
+                <div className="bg-gray-900 text-white p-6 rounded-xl shadow-md flex flex-col">
+                    <h3 className="text-sm font-bold uppercase tracking-wider mb-4">Top Accounts (Revenue)</h3>
+                    <div className="flex-1 space-y-3">
+                        {analytics.topClients.map(([name, revenue], idx) => (
+                            <div key={name} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-4 text-gray-500 font-mono">{idx + 1}.</span>
+                                    <span className="font-bold truncate max-w-[120px]">{name}</span>
+                                </div>
+                                <span className="font-bold text-blue-400">CHF {revenue.toLocaleString()}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Search and Filter */}
+            {/* Search and Filter (Previous Style) */}
             <div className="bg-white p-4 rounded-lg shadow-sm border space-y-4">
                 <div className="flex gap-4">
                     <div className="flex-1 relative">
@@ -215,7 +267,7 @@ export default function DataReviewDashboard() {
                 </div>
             </div>
 
-            {/* Hierarchical Data View */}
+            {/* Hierarchical Data View (Previous Style) */}
             <div className="space-y-4">
                 {Object.entries(clientGroups).map(([clientName, clientOrders]) => (
                     <div key={clientName} className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -264,8 +316,8 @@ export default function DataReviewDashboard() {
                                             {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                                 <div className="flex items-center space-x-2">
                                                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
-                                                            (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
-                                                                'bg-gray-100 text-gray-600'
+                                                        (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
+                                                            'bg-gray-100 text-gray-600'
                                                         }`}>
                                                         {(order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'pending' :
                                                             (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'}
@@ -338,13 +390,13 @@ export default function DataReviewDashboard() {
                                                             </td>
                                                             <td className="px-4 py-3 text-xs text-gray-600">{item.material || '-'}</td>
                                                             <td className="px-4 py-3 text-xs text-right font-medium text-green-600">
-                                                                {cleaningCost > 0 ? `$${cleaningCost.toFixed(2)}` : '-'}
+                                                                {cleaningCost > 0 ? `CHF ${cleaningCost.toFixed(2)}` : '-'}
                                                             </td>
                                                             <td className="px-4 py-3 text-xs text-right font-medium text-orange-600">
-                                                                {repairCost > 0 ? `$${repairCost.toFixed(2)}` : '-'}
+                                                                {repairCost > 0 ? `CHF ${repairCost.toFixed(2)}` : '-'}
                                                             </td>
                                                             <td className="px-4 py-3 text-xs text-right font-bold text-gray-900">
-                                                                {total > 0 ? `$${total.toFixed(2)}` : '-'}
+                                                                {total > 0 ? `CHF ${total.toFixed(2)}` : '-'}
                                                             </td>
                                                         </tr>
                                                     );
@@ -352,13 +404,13 @@ export default function DataReviewDashboard() {
                                                 <tr className="bg-white font-bold border-t">
                                                     <td colSpan={5} className="px-4 py-2 text-right text-[11px] text-gray-500 uppercase tracking-wider">Order Total:</td>
                                                     <td className="px-4 py-2 text-xs text-right text-green-700">
-                                                        ${order.items.reduce((sum, item) => sum + (item.cleaningCost || 0), 0).toFixed(2)}
+                                                        CHF {order.items.reduce((sum, item) => sum + (item.cleaningCost || 0), 0).toFixed(2)}
                                                     </td>
                                                     <td className="px-4 py-2 text-xs text-right text-orange-700">
-                                                        ${order.items.reduce((sum, item) => sum + (item.repairCost || 0), 0).toFixed(2)}
+                                                        CHF {order.items.reduce((sum, item) => sum + (item.repairCost || 0), 0).toFixed(2)}
                                                     </td>
                                                     <td className="px-4 py-2 text-sm text-right text-gray-900">
-                                                        ${order.items.reduce((sum, item) => sum + (item.cleaningCost || 0) + (item.repairCost || 0), 0).toFixed(2)}
+                                                        CHF {order.items.reduce((sum, item) => sum + (item.cleaningCost || 0) + (item.repairCost || 0), 0).toFixed(2)}
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -371,7 +423,6 @@ export default function DataReviewDashboard() {
                 ))}
             </div>
 
-            {/* Modal remains largely same but updated with direct repair fields */}
             {selectedOrder && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedOrder(null)}>
                     <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -409,8 +460,8 @@ export default function DataReviewDashboard() {
                                             <p><span className="text-gray-500">Type:</span> {item.material} - {item.state}</p>
                                             <p><span className="text-gray-500">Size:</span> {item.length}x{item.width}</p>
                                             <div className="flex justify-between font-bold border-t pt-2 mt-2">
-                                                <span>Cleaning: ${item.cleaningCost?.toFixed(2)}</span>
-                                                <span className="text-orange-600">Repair: ${item.repairCost?.toFixed(2)}</span>
+                                                <span>Cleaning: CHF {item.cleaningCost?.toFixed(2)}</span>
+                                                <span className="text-orange-600">Repair: CHF {item.repairCost?.toFixed(2)}</span>
                                             </div>
                                             {item.repairDescription && <p className="text-[10px] italic text-gray-500">{item.repairDescription}</p>}
                                         </div>
