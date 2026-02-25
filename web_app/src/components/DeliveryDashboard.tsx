@@ -1,50 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Truck, MapPin, CheckCircle, Navigation, Sparkles, Loader2, User } from 'lucide-react';
 import SignaturePad from './SignaturePad';
-
-interface CarpetItem {
-    id: string;
-    status: string;
-}
-
-interface Order {
-    id: string;
-    createdAt: string;
-    client?: {
-        name: string;
-        street: string | null;
-        number: string | null;
-        postalCode: string | null;
-        city: string | null;
-        country: string | null;
-    };
-    items: CarpetItem[];
-}
+import { useOrders } from '@/hooks/useOrders';
 
 export default function DeliveryDashboard() {
-    const [orders, setOrders] = useState<Order[]>([]);
+    const { orders, loading, loadOrders } = useOrders();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true);
     const [optimizing, setOptimizing] = useState(false);
     const [optimizedSequence, setOptimizedSequence] = useState<string[] | null>(null);
-    const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
+    const [completingOrder, setCompletingOrder] = useState<any>(null);
     const [signature, setSignature] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-
-    useEffect(() => {
-        fetch('/api/delivery/ready')
-            .then(res => res.json())
-            .then(data => {
-                setOrders(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, []);
 
     const toggleSelection = (id: string) => {
         setSelectedIds(prev =>
@@ -56,10 +24,7 @@ export default function DeliveryDashboard() {
         if (selectedIds.length < 2) return;
 
         setOptimizing(true);
-        // Simulate AI logic/API call
         setTimeout(() => {
-            // Mock optimization: Sorting selected IDs alphabetically or based on a mock distance logic
-            // In a real app, this would be a TSP solver call
             const optimized = [...selectedIds].sort();
             setOptimizedSequence(optimized);
             setOptimizing(false);
@@ -82,8 +47,9 @@ export default function DeliveryDashboard() {
 
             if (!res.ok) throw new Error('Failed to complete delivery');
 
-            // Refresh the list
-            setOrders(prev => prev.filter(o => o.id !== completingOrder.id));
+            // Refresh the list from the hook
+            await loadOrders();
+
             setCompletingOrder(null);
             setSignature(null);
             alert('Delivery completed successfully!');
@@ -96,20 +62,21 @@ export default function DeliveryDashboard() {
     };
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center p-20 space-y-4">
+        <div className="flex flex-col items-center justify-center p-20 space-y-4 page-transition">
             <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
             <p className="text-gray-500 font-medium">Scanning for ready orders...</p>
         </div>
     );
 
-    const readyOrders = Array.isArray(orders) ? orders : [];
+    // Only orders that have items ready for delivery
+    const readyOrders = orders.filter(o => o.items.some(i => i.status === 'ready_for_delivery'));
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-8">
+        <div className="max-w-4xl mx-auto p-4 space-y-8 page-transition">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Delivery Dashboard</h2>
-                    <p className="text-sm text-gray-500">Manage ready orders and optimize routes</p>
+                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Delivery Dashboard</h2>
+                    <p className="text-sm text-gray-500 font-medium">Route optimization & item tracking</p>
                 </div>
                 <div className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100 flex items-center">
                     <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">Ready</span>
@@ -119,28 +86,22 @@ export default function DeliveryDashboard() {
 
             {/* Selection and Action Bar */}
             {selectedIds.length > 0 && (
-                <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg border border-blue-200 flex flex-col md:flex-row justify-between items-center gap-4 animate-in fade-in slide-in-from-top-4">
+                <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md p-4 rounded-xl shadow-lg border border-blue-200 flex flex-col md:flex-row justify-between items-center gap-4 fade-in slide-in-top">
                     <div className="flex items-center space-x-2">
                         <div className="bg-blue-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
                             {selectedIds.length}
                         </div>
-                        <span className="font-medium text-gray-700">Orders selected for delivery</span>
+                        <span className="font-bold text-gray-700 text-sm">Orders selected for delivery</span>
                     </div>
                     <button
                         onClick={handleOptimize}
                         disabled={selectedIds.length < 2 || optimizing}
-                        className="w-full md:w-auto flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100"
+                        className="w-full md:w-auto flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100 text-sm"
                     >
                         {optimizing ? (
-                            <>
-                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Analyzing Routes...
-                            </>
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing Routes...</>
                         ) : (
-                            <>
-                                <Sparkles className="w-5 h-5 mr-2" />
-                                Smart Optimize Route
-                            </>
+                            <><Sparkles className="w-4 h-4 mr-2" /> Smart Optimize Route</>
                         )}
                     </button>
                 </div>
@@ -152,29 +113,29 @@ export default function DeliveryDashboard() {
                     <div
                         key={order.id}
                         onClick={() => toggleSelection(order.id)}
-                        className={`group cursor-pointer bg-white rounded-xl border-2 transition-all overflow-hidden ${selectedIds.includes(order.id)
+                        className={`group cursor-pointer bg-white rounded-2xl border-2 transition-all overflow-hidden ${selectedIds.includes(order.id)
                             ? 'border-blue-500 ring-4 ring-blue-500/10'
-                            : 'border-gray-100 hover:border-blue-200'
+                            : 'border-white hover:border-blue-100 shadow-sm'
                             }`}
                     >
                         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-start space-x-4">
                                 <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-colors ${selectedIds.includes(order.id)
                                     ? 'bg-blue-600 border-blue-600'
-                                    : 'bg-white border-gray-300 group-hover:border-blue-400'
+                                    : 'bg-white border-gray-200 group-hover:border-blue-400'
                                     } flex items-center justify-center`}>
                                     {selectedIds.includes(order.id) && <CheckCircle className="w-4 h-4 text-white" />}
                                 </div>
                                 <div className="space-y-1">
                                     <div className="flex items-center space-x-3">
-                                        <span className="font-mono font-bold text-gray-800">{order.id}</span>
-                                        <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                                        <span className="font-mono font-bold text-gray-900 bg-gray-50 px-1.5 py-0.5 rounded text-sm">{order.id}</span>
+                                        <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
                                             {order.items.length} items
                                         </span>
                                     </div>
-                                    <p className="font-semibold text-gray-700">{order.client?.name || 'Unknown Client'}</p>
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
+                                    <p className="font-bold text-gray-800">{order.client?.name || 'Unknown Client'}</p>
+                                    <div className="flex items-center text-xs text-gray-400 font-medium">
+                                        <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
                                         {order.client?.street && order.client?.number
                                             ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
                                             : "No address provided"}
@@ -182,105 +143,86 @@ export default function DeliveryDashboard() {
                                 </div>
                             </div>
 
-                            {/* Status and Items Info */}
-                            <div className="flex md:flex-col items-center md:items-end justify-between gap-1">
-                                <span className="text-xs text-gray-400 font-medium">
-                                    {(() => {
-                                        const date = new Date(order.createdAt);
-                                        if (isNaN(date.getTime())) return 'Invalid Date';
-                                        return new Intl.DateTimeFormat('en-CH', {
-                                            timeZone: 'Europe/Zurich',
-                                        }).format(date);
-                                    })()}
+                            <div className="flex md:flex-col items-center md:items-end justify-between gap-2">
+                                <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                                    {new Date(order.createdAt).toLocaleDateString('en-CH')}
                                 </span>
-                                <div className="flex -space-x-2">
-                                    {order.items.map((item, idx) => (
+                                <div className="flex -space-x-1.5">
+                                    {order.items.slice(0, 5).map((item) => (
                                         <div
                                             key={item.id}
-                                            className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold ${item.status === 'delivered' ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'
+                                            className={`w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black shadow-sm ${item.status === 'delivered' ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'
                                                 }`}
-                                            title={`Item ${item.id}: ${item.status}`}
                                         >
-                                            {item.id}
+                                            {item.id.split('-').pop()}
                                         </div>
                                     ))}
+                                    {order.items.length > 5 && (
+                                        <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[9px] font-black text-gray-400 shadow-sm">
+                                            +{order.items.length - 5}
+                                        </div>
+                                    )}
                                 </div>
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setCompletingOrder(order);
                                     }}
-                                    className="mt-2 text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-green-700 transition flex items-center self-end"
+                                    className="mt-2 text-xs bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center self-end active:scale-95"
                                 >
-                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                    Deliver
+                                    Complete delivery
                                 </button>
                             </div>
                         </div>
-                        {optimizedSequence && selectedIds.includes(order.id) && (
-                            <div className="bg-blue-50 px-5 py-2 border-t border-blue-100 flex items-center">
-                                <Navigation className="w-3 h-3 text-blue-500 mr-2" />
-                                <span className="text-[10px] font-bold text-blue-700 uppercase">
-                                    Stop #{optimizedSequence.indexOf(order.id) + 1} in Optimized Route
-                                </span>
-                            </div>
-                        )}
                     </div>
                 ))}
             </div>
 
-            {
-                readyOrders.length === 0 && (
-                    <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                        <Truck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500 font-medium">No orders ready for delivery yet.</p>
-                        <p className="text-sm text-gray-400">Complete measurements in Operations to see them here.</p>
-                    </div>
-                )
-            }
+            {readyOrders.length === 0 && (
+                <div className="text-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
+                    <Truck className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                    <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">No orders ready for delivery</p>
+                </div>
+            )}
 
-            {/* Signature Modal */}
-            {
-                completingOrder && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-                        <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                            <div className="bg-blue-600 p-4 text-white">
-                                <h3 className="text-lg font-bold flex items-center">
-                                    <User className="w-5 h-5 mr-2" />
-                                    Delivery Confirmation
-                                </h3>
-                                <p className="text-xs opacity-90 mt-1">Collecting signature for {completingOrder.client?.name} (Order {completingOrder.id})</p>
+            {completingOrder && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm fade-in">
+                    <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden fade-in">
+                        <div className="bg-blue-600 p-6 text-white text-center">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <Truck className="w-6 h-6" />
                             </div>
-                            <div className="p-6 space-y-4">
+                            <h3 className="text-xl font-black tracking-tight mb-1">Final Delivery Check</h3>
+                            <p className="text-xs text-blue-100 font-medium">Order {completingOrder.id} for {completingOrder.client?.name}</p>
+                        </div>
+                        <div className="p-8 space-y-6">
+                            <div className="bg-gray-50 rounded-2xl p-4">
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Receiver Signature</p>
                                 <SignaturePad onEnd={setSignature} />
+                            </div>
 
-                                <div className="flex gap-3 pt-4">
-                                    <button
-                                        onClick={() => {
-                                            setCompletingOrder(null);
-                                            setSignature(null);
-                                        }}
-                                        className="flex-1 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleCompleteDelivery}
-                                        disabled={!signature || submitting}
-                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:grayscale transition flex items-center justify-center"
-                                    >
-                                        {submitting ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                        ) : (
-                                            'Confirm Delivery'
-                                        )}
-                                    </button>
-                                </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        setCompletingOrder(null);
+                                        setSignature(null);
+                                    }}
+                                    className="flex-1 px-4 py-3 border border-gray-100 text-gray-500 rounded-2xl font-bold hover:bg-gray-50 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleCompleteDelivery}
+                                    disabled={!signature || submitting}
+                                    className="flex-[2] px-4 py-3 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100 disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center active:scale-95"
+                                >
+                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Items Delivered'}
+                                </button>
                             </div>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
         </div >
     );
 }

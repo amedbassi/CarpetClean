@@ -1,82 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { Ruler, CheckCircle, Package, Truck, Mail, Edit } from 'lucide-react';
-
-interface CarpetItem {
-    id: string;
-    status: string;
-}
-
-interface Client {
-    id: string;
-    name: string;
-    phone: string | null;
-    email: string | null;
-    street: string | null;
-    number: string | null;
-    postalCode: string | null;
-    city: string | null;
-    country: string | null;
-}
-
-interface Order {
-    id: string;
-    createdAt: string;
-    client?: Client;
-    items: CarpetItem[];
-    requiresCleaningApproval: boolean;
-    cleaningApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
-    requiresRepairApproval: boolean;
-    repairApprovalStatus: 'not_needed' | 'pending' | 'approved' | 'rejected';
-}
+import { Ruler, CheckCircle, Package, Truck, Mail, Edit, Info, Hash } from 'lucide-react';
+import { useOrders } from '@/hooks/useOrders';
+import { Client, Order } from '@/lib/types';
 
 export default function OperationsDashboard() {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { orders, loading, loadOrders, updateItemStatus } = useOrders();
     const [editingClient, setEditingClient] = useState<Client | null>(null);
     const [clientForm, setClientForm] = useState<Client | null>(null);
 
-    const loadOrders = () => {
-        fetch('/api/orders')
-            .then(res => res.json())
-            .then(data => {
-                setOrders(Array.isArray(data) ? data : []);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setOrders([]);
-                setLoading(false);
-            });
-    };
-
-    useEffect(() => {
-        loadOrders();
-    }, []);
-
     const handleStatusUpdate = async (orderId: string, itemId: string, newStatus: string) => {
-        try {
-            const response = await fetch('/api/operations/update-item', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    orderId,
-                    itemId,
-                    status: newStatus,
-                }),
-            });
-
-            if (response.ok) {
-                loadOrders(); // Refresh the list
-            } else {
-                alert('Failed to update status');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Error updating status');
-        }
+        const success = await updateItemStatus(orderId, itemId, newStatus);
+        if (!success) alert('Failed to update status');
     };
 
     const toggleApprovalRequired = async (orderId: string, currentVal: boolean) => {
@@ -86,11 +23,8 @@ export default function OperationsDashboard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orderId,
-                    // Toggle both approval flags
                     requiresCleaningApproval: !currentVal,
                     requiresRepairApproval: !currentVal,
-                    // When turning approval ON, default to "pending" (client estimate approval needed)
-                    // When turning approval OFF, mark as "not_needed"
                     cleaningApprovalStatus: !currentVal ? 'pending' : 'not_needed',
                     repairApprovalStatus: !currentVal ? 'pending' : 'not_needed'
                 }),
@@ -105,16 +39,14 @@ export default function OperationsDashboard() {
     };
 
     const sendApprovalRequest = async (order: Order) => {
-        // Check if all items are measured (estimate is ready)
-        const allMeasured = order.items.every(item => item.status === 'measured');
+        const allMeasured = order.items.every(item => item.status === 'measured' || item.status === 'ready_for_delivery' || item.status === 'delivered');
         if (!allMeasured) {
             alert('All carpets must be measured before sending the cleaning estimate for approval.');
             return;
         }
 
-        // Validate client has contact info
         if (!order.client?.email && !order.client?.phone) {
-            alert('Client must have email or phone number to send the cleaning estimate. Please update client information.');
+            alert('Client must have email or phone number to send the cleaning estimate.');
             if (order.client) {
                 setEditingClient(order.client);
                 setClientForm(order.client);
@@ -123,11 +55,8 @@ export default function OperationsDashboard() {
         }
 
         const approvalLink = `${window.location.origin}/approve/${order.id}`;
-        
-        // Copy link to clipboard
         navigator.clipboard.writeText(approvalLink);
-        
-        alert(`Cleaning estimate approval link copied to clipboard!\n\nSend this link to ${order.client.name} to approve the cleaning estimate:\n${approvalLink}\n\nContact Info:\nEmail: ${order.client.email || 'Not provided'}\nPhone: ${order.client.phone || 'Not provided'}`);
+        alert(`Approval link copied to clipboard for ${order.client.name}!`);
     };
 
     const saveClientInfo = async () => {
@@ -144,299 +73,226 @@ export default function OperationsDashboard() {
                 setEditingClient(null);
                 setClientForm(null);
                 loadOrders();
-                alert('Client information updated successfully!');
-            } else {
-                alert('Failed to update client information');
+                alert('Client information updated!');
             }
         } catch (error) {
             console.error(error);
-            alert('Error updating client information');
         }
     };
 
-    if (loading) return <div className="p-8 text-center">Loading orders...</div>;
+    if (loading) return <div className="p-20 text-center font-medium text-gray-400 animate-pulse">Loading operations...</div>;
 
-    const pendingRugs_count = orders.flatMap(o => o.items).filter(i => !i.status || i.status === 'pending').length;
-    const measuredRugs_count = orders.flatMap(o => o.items).filter(i => i.status === 'measured').length;
-    const readyRugs_count = orders.flatMap(o => o.items).filter(i => i.status === 'ready_for_delivery').length;
-
-    const getStatusBadge = (status?: string) => {
-        switch (status) {
-            case 'measured':
-                return (
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full flex items-center">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Measured
-                    </span>
-                );
-            case 'ready_for_delivery':
-                return (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full flex items-center">
-                        <Package className="w-3 h-3 mr-1" /> Ready
-                    </span>
-                );
-            case 'delivered':
-                return (
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full flex items-center">
-                        <Truck className="w-3 h-3 mr-1" /> Delivered
-                    </span>
-                );
-            default:
-                return (
-                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-                        Pending
-                    </span>
-                );
-        }
-    };
+    const pendingCount = orders.flatMap(o => o.items).filter(i => !i.status || i.status === 'pending').length;
+    const measuredCount = orders.flatMap(o => o.items).filter(i => i.status === 'measured').length;
+    const readyCount = orders.flatMap(o => o.items).filter(i => i.status === 'ready_for_delivery').length;
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Operations Dashboard</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                    <h3 className="text-sm font-medium text-yellow-600">Pending Measurement</h3>
-                    <p className="text-3xl font-bold text-yellow-800">{pendingRugs_count}</p>
+        <div className="max-w-5xl mx-auto p-4 space-y-8 page-transition">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Operations Dashboard</h2>
+                    <p className="text-sm text-gray-500 font-medium">Measurement & Status Management</p>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <h3 className="text-sm font-medium text-blue-600">Measured</h3>
-                    <p className="text-3xl font-bold text-blue-800">{measuredRugs_count}</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                    <h3 className="text-sm font-medium text-green-600">Ready for Delivery</h3>
-                    <p className="text-3xl font-bold text-green-800">{readyRugs_count}</p>
+                <div className="flex gap-4">
+                    <div className="bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100 text-center">
+                        <span className="block text-[10px] font-black text-yellow-600 uppercase tracking-widest">Pending</span>
+                        <span className="text-lg font-black text-yellow-800 leading-none">{pendingCount}</span>
+                    </div>
+                    <div className="bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 text-center">
+                        <span className="block text-[10px] font-black text-blue-600 uppercase tracking-widest">Measured</span>
+                        <span className="text-lg font-black text-blue-800 leading-none">{measuredCount}</span>
+                    </div>
+                    <div className="bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 text-center">
+                        <span className="block text-[10px] font-black text-green-600 uppercase tracking-widest">Ready</span>
+                        <span className="text-lg font-black text-green-800 leading-none">{readyCount}</span>
+                    </div>
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {orders.map(order => (
-                    <div key={order.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                        <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                            <div className="flex items-center space-x-4">
-                                <div>
-                                    <span className="font-mono font-bold text-gray-700">{order.id}</span>
-                                    <span className="text-sm text-gray-500 ml-3">{order.client?.name || 'Unknown Client'}</span>
+                    <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                        <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
+                            <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                    <Hash className="w-4 h-4 text-gray-400" />
+                                    <span className="font-mono font-bold text-gray-900">{order.id}</span>
                                 </div>
-                                <label className="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1 rounded-md border text-xs shadow-sm hover:bg-gray-50">
+                                <div className="h-4 w-px bg-gray-200"></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold text-gray-700">{order.client?.name || 'Unknown Client'}</span>
+                                    <button
+                                        onClick={() => { if (order.client) { setEditingClient(order.client); setClientForm(order.client); } }}
+                                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                    >
+                                        <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
                                     <input
                                         type="checkbox"
                                         checked={order.requiresCleaningApproval || order.requiresRepairApproval}
                                         onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval || order.requiresRepairApproval)}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
-                                    <span className="font-medium text-gray-700">Requires Client Approval</span>
+                                    Approval Flow
                                 </label>
+
                                 {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
-                                    <>
-                                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                                            (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
-                                            (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
-                                            'bg-gray-100 text-gray-600'
-                                        }`}>
-                                            {order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 
-                                             order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 'not needed'}
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved')
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-orange-100 text-orange-700'
+                                            }`}>
+                                            {order.cleaningApprovalStatus === 'approved' ? 'Approved' : 'Pending'}
                                         </span>
-                                        
                                         <button
                                             onClick={() => sendApprovalRequest(order)}
-                                            className="flex items-center text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                            title="Send/Copy Approval Link"
                                         >
-                                            <Mail className="w-3 h-3 mr-1" />
-                                            Send Approval
+                                            <Mail className="w-3.5 h-3.5" />
                                         </button>
-                                        
-                                        <button
-                                            onClick={() => {
-                                                if (order.client) {
-                                                    setEditingClient(order.client);
-                                                    setClientForm(order.client);
-                                                }
-                                            }}
-                                            className="flex items-center text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-                                        >
-                                            <Edit className="w-3 h-3 mr-1" />
-                                            Edit Client
-                                        </button>
-                                    </>
+                                    </div>
                                 )}
                             </div>
-                            <span className="text-sm text-gray-500">
-                                {(() => {
-                                    const date = new Date(order.createdAt);
-                                    if (isNaN(date.getTime())) return 'Invalid Date';
-                                    return new Intl.DateTimeFormat('en-CH', {
-                                        timeZone: 'Europe/Zurich',
-                                    }).format(date);
-                                })()}
-                            </span>
                         </div>
-                        <div className="divide-y">
+
+                        <div className="divide-y divide-gray-50">
                             {order.items.map(item => (
-                                <div key={item.id} className="p-4 hover:bg-gray-50 transition">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center space-x-3">
-                                            <span className="font-mono font-medium text-gray-800">{item.id}</span>
-                                            {getStatusBadge(item.status)}
+                                <div key={item.id} className="p-5 hover:bg-gray-50/30 transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <span className="font-mono font-bold text-gray-400 text-sm">#{item.id}</span>
+                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${item.status === 'measured' ? 'bg-blue-50 text-blue-600' :
+                                                item.status === 'ready_for_delivery' ? 'bg-green-50 text-green-600' :
+                                                    item.status === 'delivered' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-50 text-yellow-600'
+                                                }`}>
+                                                {item.status || 'pending'}
+                                            </span>
                                         </div>
 
-                                        <Link
-                                            href={`/operations/${order.id}/${item.id}`}
-                                            className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-                                        >
-                                            <Ruler className="w-4 h-4 mr-1" />
-                                            {item.status === 'measured' || item.status === 'ready_for_delivery' ? 'Edit Details' : 'Input Details'}
-                                        </Link>
-                                    </div>
-
-                                    {/* Action Buttons */}
-                                    <div className="flex space-x-2 mt-2">
-                                        {item.status === 'measured' && (
-                                            <button
-                                                onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
-                                                disabled={(order.requiresCleaningApproval || order.requiresRepairApproval) && 
-                                                         (order.cleaningApprovalStatus !== 'approved' && order.repairApprovalStatus !== 'approved')}
-                                                className={`px-3 py-1.5 text-white text-xs font-medium rounded transition flex items-center ${
-                                                    (order.requiresCleaningApproval || order.requiresRepairApproval) && 
-                                                    (order.cleaningApprovalStatus !== 'approved' && order.repairApprovalStatus !== 'approved')
-                                                        ? 'bg-gray-400 cursor-not-allowed'
-                                                        : 'bg-green-600 hover:bg-green-700'
-                                                    }`}
+                                        <div className="flex items-center gap-3">
+                                            {item.status === 'measured' && (
+                                                <button
+                                                    onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
+                                                    disabled={(order.requiresCleaningApproval || order.requiresRepairApproval) && (order.cleaningApprovalStatus !== 'approved')}
+                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-green-100 disabled:opacity-50 disabled:grayscale"
+                                                >
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    Mark Ready
+                                                </button>
+                                            )}
+                                            {item.status === 'ready_for_delivery' && (
+                                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold">
+                                                    <Truck className="w-3 h-3" />
+                                                    Ready for Exit
+                                                </div>
+                                            )}
+                                            <Link
+                                                href={`/operations/${order.id}/${item.id}`}
+                                                className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
                                             >
-                                                <Package className="w-3 h-3 mr-1" />
-                                                Mark as Ready
-                                            </button>
-                                        )}
-                                        {(order.requiresCleaningApproval || order.requiresRepairApproval) && 
-                                         (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') && (
-                                            <p className="text-[10px] text-orange-600 italic mt-1">
-                                                * Waiting for client approval of estimate
-                                            </p>
-                                        )}
-                                        {item.status === 'ready_for_delivery' && (
-                                            <button
-                                                onClick={() => handleStatusUpdate(order.id, item.id, 'delivered')}
-                                                className="px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded hover:bg-gray-700 transition flex items-center"
-                                            >
-                                                <Truck className="w-3 h-3 mr-1" />
-                                                Mark as Delivered
-                                            </button>
-                                        )}
+                                                <Ruler className="w-4 h-4" />
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 ))}
-                {orders.length === 0 && (
-                    <div className="text-center py-12 text-gray-500">No orders found.</div>
-                )}
             </div>
 
             {/* Edit Client Modal */}
             {editingClient && clientForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setEditingClient(null)}>
-                    <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-xl font-bold mb-4">Edit Client Information</h3>
-                        
+                <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl fade-in">
+                        <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                            <Info className="w-5 h-5 text-blue-600" />
+                            Client Master Record
+                        </h3>
+
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Full Name</label>
                                 <input
                                     type="text"
                                     value={clientForm.name}
-                                    onChange={e => setClientForm({...clientForm, name: e.target.value})}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    onChange={e => setClientForm({ ...clientForm, name: e.target.value })}
+                                    className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium"
                                 />
                             </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                <input
-                                    type="tel"
-                                    value={clientForm.phone || ''}
-                                    onChange={e => setClientForm({...clientForm, phone: e.target.value})}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                />
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Email</label>
-                                <input
-                                    type="email"
-                                    value={clientForm.email || ''}
-                                    onChange={e => setClientForm({...clientForm, email: e.target.value})}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                />
-                            </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Street</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Phone</label>
                                     <input
-                                        type="text"
+                                        type="tel"
+                                        value={clientForm.phone || ''}
+                                        onChange={e => setClientForm({ ...clientForm, phone: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium text-sm"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Email</label>
+                                    <input
+                                        type="email"
+                                        value={clientForm.email || ''}
+                                        onChange={e => setClientForm({ ...clientForm, email: e.target.value })}
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 font-medium text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1 pt-2">
+                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Address Details</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <input
+                                        placeholder="Street"
+                                        className="col-span-2 w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm"
                                         value={clientForm.street || ''}
-                                        onChange={e => setClientForm({...clientForm, street: e.target.value})}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        onChange={e => setClientForm({ ...clientForm, street: e.target.value })}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Number</label>
                                     <input
-                                        type="text"
+                                        placeholder="No."
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm"
                                         value={clientForm.number || ''}
-                                        onChange={e => setClientForm({...clientForm, number: e.target.value})}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        onChange={e => setClientForm({ ...clientForm, number: e.target.value })}
                                     />
                                 </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
                                     <input
-                                        type="text"
+                                        placeholder="Zip"
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm"
                                         value={clientForm.postalCode || ''}
-                                        onChange={e => setClientForm({...clientForm, postalCode: e.target.value})}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        onChange={e => setClientForm({ ...clientForm, postalCode: e.target.value })}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">City</label>
                                     <input
-                                        type="text"
+                                        placeholder="City"
+                                        className="w-full px-4 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500/20 text-sm"
                                         value={clientForm.city || ''}
-                                        onChange={e => setClientForm({...clientForm, city: e.target.value})}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                        onChange={e => setClientForm({ ...clientForm, city: e.target.value })}
                                     />
                                 </div>
-                            </div>
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Country</label>
-                                <input
-                                    type="text"
-                                    value={clientForm.country || ''}
-                                    onChange={e => setClientForm({...clientForm, country: e.target.value})}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-                                />
                             </div>
                         </div>
-                        
-                        <div className="flex space-x-3 mt-6">
+
+                        <div className="flex gap-3 mt-8">
                             <button
-                                onClick={saveClientInfo}
-                                className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-                            >
-                                Save Changes
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setEditingClient(null);
-                                    setClientForm(null);
-                                }}
-                                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
+                                onClick={() => setEditingClient(null)}
+                                className="flex-1 px-4 py-3 text-gray-400 font-bold hover:bg-gray-50 rounded-2xl transition-all"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                onClick={saveClientInfo}
+                                className="flex-[2] px-4 py-3 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95"
+                            >
+                                Update Record
                             </button>
                         </div>
                     </div>

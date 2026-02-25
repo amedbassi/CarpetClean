@@ -1,44 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Hammer, CheckCircle, AlertTriangle } from 'lucide-react';
-
-interface CarpetItem {
-    id: string;
-    status: string;
-    state?: string;
-    repairCost?: number;
-    repairDescription?: string;
-}
-
-interface Order {
-    id: string;
-    createdAt: string;
-    client?: {
-        name: string;
-    };
-    items: CarpetItem[];
-}
+import { useOrders } from '@/hooks/useOrders';
 
 export default function RepairDashboard() {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { orders, loading } = useOrders();
 
-    useEffect(() => {
-        fetch('/api/orders')
-            .then(res => res.json())
-            .then(data => {
-                setOrders(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, []);
-
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading repair requests...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500 font-medium">Loading repair requests...</div>;
 
     // Filter items that need repair: Only Worn and Damaged items
     const repairItems = orders.flatMap(order =>
@@ -51,50 +20,52 @@ export default function RepairDashboard() {
     );
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                <Hammer className="w-6 h-6 mr-2 text-orange-600" />
-                Repair Team Dashboard
-            </h2>
-
-            <div className="grid grid-cols-1 gap-4 mb-4">
-                <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
-                    <h3 className="text-sm font-medium text-orange-800">Rugs Needing Attention</h3>
-                    <p className="text-3xl font-bold text-orange-900">{repairItems.length}</p>
+        <div className="max-w-4xl mx-auto p-4 space-y-6 page-transition">
+            <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                    <Hammer className="w-6 h-6 mr-2 text-orange-600" />
+                    Repair Team Dashboard
+                </h2>
+                <div className="bg-orange-50 px-3 py-1 rounded-full border border-orange-100 flex items-center">
+                    <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none mr-2">Pending</span>
+                    <span className="text-lg font-black text-orange-800 leading-none">{repairItems.length}</span>
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                <div className="divide-y">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="divide-y divide-gray-50">
                     {repairItems.map(item => (
-                        <div key={`${item.orderId}-${item.id}`} className="p-4 hover:bg-gray-50 transition">
-                            <div className="flex items-center justify-between mb-2">
+                        <div key={`${item.orderId}-${item.id}`} className="p-5 hover:bg-gray-50/50 transition-colors">
+                            <div className="flex items-center justify-between mb-3">
                                 <div className="flex items-center space-x-3">
-                                    <span className="font-mono font-bold text-gray-700">{item.id}</span>
-                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded border">
+                                    <span className="font-mono font-bold text-gray-900 px-2 py-1 bg-gray-100 rounded text-sm">#{item.id}</span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                         Order: {item.orderId}
                                     </span>
                                 </div>
                                 {item.repairCost && item.repairCost > 0 ? (
-                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center">
-                                        <CheckCircle className="w-3 h-3 mr-1" /> Estimate Ready (${item.repairCost.toFixed(2)})
+                                    <span className="text-[10px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-100 flex items-center uppercase tracking-wider">
+                                        <CheckCircle className="w-3 h-3 mr-1" /> Estimate Ready (CHF {item.repairCost.toFixed(2)})
                                     </span>
                                 ) : (
-                                    <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full flex items-center">
+                                    <span className="text-[10px] font-bold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-100 flex items-center uppercase tracking-wider animate-pulse">
                                         <AlertTriangle className="w-3 h-3 mr-1" /> Needs Estimate
                                     </span>
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-end">
                                 <div>
-                                    <p className="text-sm text-gray-600">Condition: <span className="font-medium text-red-600">{item.state}</span></p>
-                                    <p className="text-xs text-gray-400 mt-1">Client: {item.clientName}</p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-bold text-gray-400 uppercase">Condition:</span>
+                                        <span className={`text-xs font-bold ${item.state === 'Damaged' ? 'text-red-500' : 'text-orange-500'}`}>{item.state}</span>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">{item.clientName}</p>
                                 </div>
 
                                 <Link
                                     href={`/repair/${item.orderId}/${item.id}`}
-                                    className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-100 transition-all active:scale-95"
                                 >
                                     {(item.repairCost || 0) > 0 ? 'Edit Estimate' : 'Create Estimate'}
                                 </Link>
@@ -103,8 +74,9 @@ export default function RepairDashboard() {
                     ))}
 
                     {repairItems.length === 0 && (
-                        <div className="p-8 text-center text-gray-500">
-                            No rugs currently require repair.
+                        <div className="p-12 text-center text-gray-400">
+                            <Hammer className="w-12 h-12 mx-auto mb-4 opacity-10" />
+                            <p className="font-medium">No rugs currently require repair.</p>
                         </div>
                     )}
                 </div>
