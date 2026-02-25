@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Eye, Download, LinkIcon } from 'lucide-react';
+import { Search, Eye, Download, LinkIcon, User } from 'lucide-react';
 
 interface CarpetItem {
     id: string;
@@ -13,6 +13,7 @@ interface CarpetItem {
     cleaningCost?: number;
     repairCost?: number;
     repairDescription?: string;
+    individualClient?: string | null;
 }
 
 interface Order {
@@ -83,7 +84,7 @@ export default function DataReviewDashboard() {
     const uniqueClients = Array.from(new Set(orders.map(o => o.client?.name).filter(Boolean))) as string[];
 
     const exportToCSV = () => {
-        const headers = ['Client', 'Order ID', 'Rug #', 'Item Status', 'Approval', 'Dimensions', 'Material', 'State', 'Cleaning Cost', 'Repair Cost', 'Total'];
+        const headers = ['Client', 'Order ID', 'Rug #', 'Individual Client', 'Item Status', 'Approval', 'Dimensions', 'Material', 'State', 'Cleaning Cost', 'Repair Cost', 'Total'];
         const rows: string[][] = [];
 
         orders.forEach(order => {
@@ -94,10 +95,11 @@ export default function DataReviewDashboard() {
                     order.client?.name || 'Unknown',
                     order.id,
                     item.id,
+                    item.individualClient || '',
                     item.status || 'pending',
-                    (order.requiresCleaningApproval || order.requiresRepairApproval) 
-                        ? (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' : 
-                           order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 'not_needed')
+                    (order.requiresCleaningApproval || order.requiresRepairApproval)
+                        ? (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' :
+                            order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending' ? 'pending' : 'not_needed')
                         : 'N/A',
                     item.length && item.width ? `${item.length}m × ${item.width}m` : '',
                     item.material || '',
@@ -157,8 +159,8 @@ export default function DataReviewDashboard() {
                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
                     <h3 className="text-sm font-medium text-orange-600">Waiting Approval</h3>
                     <p className="text-3xl font-bold text-orange-800">
-                        {orders.filter(o => (o.requiresCleaningApproval || o.requiresRepairApproval) && 
-                                           (o.cleaningApprovalStatus === 'pending' || o.repairApprovalStatus === 'pending')).length}
+                        {orders.filter(o => (o.requiresCleaningApproval || o.requiresRepairApproval) &&
+                            (o.cleaningApprovalStatus === 'pending' || o.repairApprovalStatus === 'pending')).length}
                     </p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg border border-green-100">
@@ -261,13 +263,12 @@ export default function DataReviewDashboard() {
                                             <span className="font-mono font-bold text-gray-900">{order.id}</span>
                                             {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                                 <div className="flex items-center space-x-2">
-                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
-                                                        (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
-                                                        (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-gray-100 text-gray-600'
-                                                    }`}>
+                                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'bg-green-100 text-green-700' :
+                                                            (order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'bg-orange-100 text-orange-700' :
+                                                                'bg-gray-100 text-gray-600'
+                                                        }`}>
                                                         {(order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') ? 'pending' :
-                                                         (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'}
+                                                            (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'}
                                                     </span>
                                                     {(order.cleaningApprovalStatus === 'pending' || order.repairApprovalStatus === 'pending') && (
                                                         <button
@@ -295,6 +296,7 @@ export default function DataReviewDashboard() {
                                             <thead className="bg-gray-200 text-xs">
                                                 <tr>
                                                     <th className="px-4 py-2 text-left font-medium text-gray-600">Rug #</th>
+                                                    <th className="px-4 py-2 text-left font-medium text-gray-600">Ind. Client</th>
                                                     <th className="px-4 py-2 text-left font-medium text-gray-600">Status</th>
                                                     <th className="px-4 py-2 text-left font-medium text-gray-600">Size</th>
                                                     <th className="px-4 py-2 text-left font-medium text-gray-600">Material</th>
@@ -313,10 +315,20 @@ export default function DataReviewDashboard() {
                                                         <tr key={item.id} className="hover:bg-gray-100 transition">
                                                             <td className="px-4 py-3 font-mono text-sm font-medium text-gray-900 leading-none">#{item.id}</td>
                                                             <td className="px-4 py-3">
+                                                                {item.individualClient ? (
+                                                                    <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded-full whitespace-nowrap">
+                                                                        <User className="w-2.5 h-2.5 flex-shrink-0" />
+                                                                        {item.individualClient}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-gray-300 text-xs">—</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3">
                                                                 <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase transition ${item.status === 'delivered' ? 'bg-gray-100 text-gray-700' :
-                                                                        item.status === 'ready_for_delivery' ? 'bg-green-100 text-green-700 font-bold' :
-                                                                            item.status === 'measured' ? 'bg-blue-100 text-blue-700' :
-                                                                                'bg-yellow-100 text-yellow-700'
+                                                                    item.status === 'ready_for_delivery' ? 'bg-green-100 text-green-700 font-bold' :
+                                                                        item.status === 'measured' ? 'bg-blue-100 text-blue-700' :
+                                                                            'bg-yellow-100 text-yellow-700'
                                                                     }`}>
                                                                     {item.status.replace('_', ' ')}
                                                                 </span>
@@ -338,7 +350,7 @@ export default function DataReviewDashboard() {
                                                     );
                                                 })}
                                                 <tr className="bg-white font-bold border-t">
-                                                    <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-gray-500 uppercase tracking-wider">Order Total:</td>
+                                                    <td colSpan={5} className="px-4 py-2 text-right text-[11px] text-gray-500 uppercase tracking-wider">Order Total:</td>
                                                     <td className="px-4 py-2 text-xs text-right text-green-700">
                                                         ${order.items.reduce((sum, item) => sum + (item.cleaningCost || 0), 0).toFixed(2)}
                                                     </td>
@@ -374,7 +386,7 @@ export default function DataReviewDashboard() {
                                 <div className="col-span-2 border-t pt-2 mt-2">
                                     <span className="text-gray-500">Approval:</span> {
                                         (selectedOrder.cleaningApprovalStatus === 'pending' || selectedOrder.repairApprovalStatus === 'pending') ? 'pending' :
-                                        (selectedOrder.cleaningApprovalStatus === 'approved' || selectedOrder.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'
+                                            (selectedOrder.cleaningApprovalStatus === 'approved' || selectedOrder.repairApprovalStatus === 'approved') ? 'approved' : 'not_needed'
                                     }
                                 </div>
                             </div>
@@ -382,7 +394,15 @@ export default function DataReviewDashboard() {
                                 {selectedOrder.items.map(item => (
                                     <div key={item.id} className="border p-4 rounded-lg bg-gray-50">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="font-bold">Rug #{item.id}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold">Rug #{item.id}</span>
+                                                {item.individualClient && (
+                                                    <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded-full">
+                                                        <User className="w-2.5 h-2.5" />
+                                                        {item.individualClient}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <span className="text-[10px] uppercase font-bold">{item.status}</span>
                                         </div>
                                         <div className="text-xs space-y-1">

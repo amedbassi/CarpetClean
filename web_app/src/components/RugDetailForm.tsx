@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Camera, Save, ArrowLeft } from 'lucide-react';
+import { Camera, Save, ArrowLeft, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -14,6 +14,7 @@ interface RugDetailFormProps {
         state?: string;
         material?: string;
         photo?: string | null;
+        individualClient?: string | null;
     };
 }
 
@@ -29,6 +30,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
+    const [individualClient, setIndividualClient] = useState<string | null>(null);
 
     const [cleaningCost, setCleaningCost] = useState(0);
 
@@ -49,6 +51,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         photo: null,
                     });
                     setExistingPhoto(item.photo || null);
+                    setIndividualClient(item.individualClient || null);
                 }
             } catch (err) {
                 console.error(err);
@@ -125,9 +128,15 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                 <Link href="/operations" className="mr-4 text-gray-600 hover:text-gray-900">
                     <ArrowLeft className="w-6 h-6" />
                 </Link>
-                <div>
+                <div className="flex-1">
                     <h2 className="text-xl font-bold text-gray-800">Rug Details</h2>
                     <p className="text-sm font-mono text-gray-500">{itemId}</p>
+                    {individualClient && (
+                        <span className="inline-flex items-center gap-1 mt-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                            <User className="w-3 h-3" />
+                            {individualClient}
+                        </span>
+                    )}
                 </div>
             </div>
 

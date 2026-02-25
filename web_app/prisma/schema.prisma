@@ -55,8 +55,9 @@ model CarpetItem {
   photo             String?
   cleaningCost      Float?
   repairCost        Float?
-  repairDescription String?
-  order             Order   @relation(fields: [orderId], references: [id])
+  repairDescription  String?
+  individualClient   String?
+  order              Order   @relation(fields: [orderId], references: [id])
 
   @@id([orderId, id])
 }

@@ -32,6 +32,7 @@ export async function POST(request: Request) {
                         material?: string;
                         state?: string;
                         photo?: string;
+                        individualClient?: string;
                     }) => ({
                         id: item.id,
                         status: item.status || "pending",
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
                         material: item.material,
                         state: item.state,
                         photo: item.photo,
+                        individualClient: item.individualClient || null,
                     })),
                 },
             },
@@ -72,7 +74,7 @@ export async function GET() {
     } catch (error: unknown) {
         console.error('Error fetching orders:', error);
         const message = error instanceof Error ? error.message : 'Unknown error';
-        
+
         // Return empty array instead of error object so frontend doesn't break
         return NextResponse.json([], { status: 200 });
     }
