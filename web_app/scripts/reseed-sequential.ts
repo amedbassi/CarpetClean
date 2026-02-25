@@ -100,21 +100,29 @@ async function main() {
 
         const itemCount = getRandomInt(1, 4);
         for (let j = 0; j < itemCount; j++) {
-            const cleaningCost = getRandomFloat(40, 450);
-            const repairCost = Math.random() > 0.85 ? getRandomFloat(80, 800) : 0;
+            const length = parseFloat(getRandomFloat(0.8, 4.5).toFixed(1));
+            const width = parseFloat(getRandomFloat(0.8, 3.5).toFixed(1));
+            const area = length * width;
+
+            // Swiss cleaning rates: 35-75 CHF/m2 based on material
+            const ratePerM2 = getRandomInt(35, 75);
+            const cleaningCost = area * ratePerM2;
+
+            // Swiss repair rates: Base fee + labor
+            const repairCost = Math.random() > 0.85 ? getRandomFloat(120, 850) : 0;
 
             await prisma.carpetItem.create({
                 data: {
                     id: `${j + 1}`,
                     orderId: order.id,
                     status: getRandomItem(STATUSES),
-                    length: getRandomFloat(0.8, 4.5).toFixed(1),
-                    width: getRandomFloat(0.8, 3.5).toFixed(1),
+                    length: length.toString(),
+                    width: width.toString(),
                     material: getRandomItem(MATERIALS),
                     state: getRandomItem(['Good', 'Worn', 'Minor Damage', 'Stained']),
                     cleaningCost,
                     repairCost,
-                    repairDescription: repairCost > 0 ? 'Surface treatment and edge correction.' : null,
+                    repairDescription: repairCost > 0 ? 'Surface treatment and professional edge correction.' : null,
                     individualClient: Math.random() > 0.75 ? `Suite ${getRandomInt(100, 500)}` : null,
                 },
             });

@@ -99,22 +99,25 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 </div>
 
                 <div>
-                    <label htmlFor="repair-cost" className="block text-sm font-medium text-gray-700">Estimated Repair Cost ($)</label>
+                    <label htmlFor="repair-cost" className="block text-sm font-medium text-gray-700">Estimated Repair Cost (CHF)</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 text-sm">$</span>
+                            <span className="text-gray-500 text-sm">CHF</span>
                         </div>
                         <input
                             id="repair-cost"
                             type="number"
                             step="0.01"
                             required
-                            className="block w-full pl-7 pr-12 py-3 border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 text-lg font-bold"
+                            className="block w-full pl-12 pr-12 py-3 border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 text-lg font-bold"
                             placeholder="0.00"
                             value={formData.repairCost}
                             onChange={e => setFormData(prev => ({ ...prev, repairCost: e.target.value }))}
                         />
                     </div>
+                    <p className="text-[10px] text-gray-500 mt-1">
+                        Typical Swiss rates: Fringe repair (150-300 CHF), Edge binding (120-250 CHF).
+                    </p>
                 </div>
 
                 <div className="pt-2">
