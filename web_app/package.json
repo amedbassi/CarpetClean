@@ -6,11 +6,8 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate",
-    "mark-ready": "tsx scripts/mark-ready.ts",
-    "migrate-clients": "tsx scripts/migrate-to-clients.ts",
-    "clear-db": "tsx scripts/clear-database.ts"
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",

@@ -122,7 +122,6 @@ export default function DeliveryForm() {
             }));
             return { ...prev, items: newItems };
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [scannedReceipts]);
 
     const handleClientNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -462,7 +461,7 @@ export default function DeliveryForm() {
                 </div>
 
                 {scannedReceipts.length === 0 && (
-                    <p className="text-sm text-gray-400 italic">No receipts scanned — tap "+ Scan Receipt" if this is a partner order.</p>
+                    <p className="text-sm text-gray-400 italic">No receipts scanned — tap &quot;+ Scan Receipt&quot; if this is a partner order.</p>
                 )}
 
                 {scannedReceipts.map((r, idx) => (

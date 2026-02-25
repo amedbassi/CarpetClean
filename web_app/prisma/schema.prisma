@@ -34,6 +34,7 @@ model Order {
   clientId                String
   client                  Client       @relation(fields: [clientId], references: [id])
   signature               String?
+  deliverySignature       String?
   receipt                 String?
   requiresCleaningApproval Boolean     @default(false)
   cleaningApprovalStatus  String       @default("not_needed")

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Truck, MapPin, CheckCircle, Navigation, Sparkles, Loader2 } from 'lucide-react';
+import { Truck, MapPin, CheckCircle, Navigation, Sparkles, Loader2, User } from 'lucide-react';
+import SignaturePad from './SignaturePad';
 
 interface CarpetItem {
     id: string;
@@ -28,6 +29,9 @@ export default function DeliveryDashboard() {
     const [loading, setLoading] = useState(true);
     const [optimizing, setOptimizing] = useState(false);
     const [optimizedSequence, setOptimizedSequence] = useState<string[] | null>(null);
+    const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
+    const [signature, setSignature] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         fetch('/api/delivery/ready')
@@ -60,6 +64,35 @@ export default function DeliveryDashboard() {
             setOptimizedSequence(optimized);
             setOptimizing(false);
         }, 1500);
+    };
+
+    const handleCompleteDelivery = async () => {
+        if (!completingOrder || !signature) return;
+
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/delivery/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: completingOrder.id,
+                    deliverySignature: signature
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to complete delivery');
+
+            // Refresh the list
+            setOrders(prev => prev.filter(o => o.id !== completingOrder.id));
+            setCompletingOrder(null);
+            setSignature(null);
+            alert('Delivery completed successfully!');
+        } catch (err) {
+            console.error(err);
+            alert('Error completing delivery. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (loading) return (
@@ -142,7 +175,7 @@ export default function DeliveryDashboard() {
                                     <p className="font-semibold text-gray-700">{order.client?.name || 'Unknown Client'}</p>
                                     <div className="flex items-center text-sm text-gray-500">
                                         <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-400" />
-                                        {order.client?.street && order.client?.number 
+                                        {order.client?.street && order.client?.number
                                             ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
                                             : "No address provided"}
                                     </div>
@@ -172,6 +205,16 @@ export default function DeliveryDashboard() {
                                         </div>
                                     ))}
                                 </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setCompletingOrder(order);
+                                    }}
+                                    className="mt-2 text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold hover:bg-green-700 transition flex items-center self-end"
+                                >
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Deliver
+                                </button>
                             </div>
                         </div>
                         {optimizedSequence && selectedIds.includes(order.id) && (
@@ -186,13 +229,58 @@ export default function DeliveryDashboard() {
                 ))}
             </div>
 
-            {readyOrders.length === 0 && (
-                <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                    <Truck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 font-medium">No orders ready for delivery yet.</p>
-                    <p className="text-sm text-gray-400">Complete measurements in Operations to see them here.</p>
-                </div>
-            )}
-        </div>
+            {
+                readyOrders.length === 0 && (
+                    <div className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                        <Truck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500 font-medium">No orders ready for delivery yet.</p>
+                        <p className="text-sm text-gray-400">Complete measurements in Operations to see them here.</p>
+                    </div>
+                )
+            }
+
+            {/* Signature Modal */}
+            {
+                completingOrder && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                            <div className="bg-blue-600 p-4 text-white">
+                                <h3 className="text-lg font-bold flex items-center">
+                                    <User className="w-5 h-5 mr-2" />
+                                    Delivery Confirmation
+                                </h3>
+                                <p className="text-xs opacity-90 mt-1">Collecting signature for {completingOrder.client?.name} (Order {completingOrder.id})</p>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <SignaturePad onEnd={setSignature} />
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        onClick={() => {
+                                            setCompletingOrder(null);
+                                            setSignature(null);
+                                        }}
+                                        className="flex-1 px-4 py-2 border-2 border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleCompleteDelivery}
+                                        disabled={!signature || submitting}
+                                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:grayscale transition flex items-center justify-center"
+                                    >
+                                        {submitting ? (
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                            'Confirm Delivery'
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 }
