@@ -16,14 +16,14 @@ export interface CarpetItem {
     id: string;
     orderId: string;
     status: string;
-    length: string;
-    width: string;
-    material: string;
-    state: string; // e.g., 'Good', 'Worn', 'Damaged'
-    cleaningCost: number;
-    repairCost: number;
+    length: string | null;
+    width: string | null;
+    material: string | null;
+    state: string | null;
+    photo: string | null;
+    cleaningCost: number | null;
+    repairCost: number | null;
     repairDescription: string | null;
-    individualClient: string | null;
 }
 
 export interface Order {
@@ -34,7 +34,8 @@ export interface Order {
     cleaningApprovalStatus: ApprovalStatus;
     requiresRepairApproval: boolean;
     repairApprovalStatus: ApprovalStatus;
-    deliverySignature: string | null;
+    signature: string | null;
+    receipt: string | null;
     client?: Client;
     items: CarpetItem[];
 }
