@@ -17,7 +17,6 @@ import {
     LinkIcon,
     User
 } from 'lucide-react';
-import Link from 'next/link';
 import { useOrders } from '@/hooks/useOrders';
 import { Order, CarpetItem } from '@/lib/types';
 
@@ -27,7 +26,8 @@ export default function DataReviewDashboard() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [clientFilter, setClientFilter] = useState('all');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [showClientInfo, setShowClientInfo] = useState<string | null>(null);
+    const [editingClient, setEditingClient] = useState<any>(null);
+    const [clientForm, setClientForm] = useState<any>(null);
 
     // Memoized Analytics
     const analytics = useMemo(() => {
@@ -119,6 +119,30 @@ export default function DataReviewDashboard() {
         const url = `${window.location.origin}/approve/${orderId}`;
         navigator.clipboard.writeText(url);
         alert('Approval link copied to clipboard!');
+    };
+
+    const saveClientInfo = async () => {
+        if (!clientForm) return;
+
+        try {
+            const response = await fetch(`/api/clients/${clientForm.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(clientForm),
+            });
+
+            if (response.ok) {
+                setEditingClient(null);
+                setClientForm(null);
+                // Reload orders to get updated client info
+                window.location.reload();
+            } else {
+                alert('Failed to update client information');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error updating client information');
+        }
     };
 
     if (loading) return <div className="p-20 text-center font-medium text-gray-400 animate-pulse">Generating insights...</div>;
@@ -254,12 +278,18 @@ export default function DataReviewDashboard() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Link
-                                    href={`/data/client/${clientOrders[0].client?.id}`}
+                                <button
+                                    onClick={() => {
+                                        const client = clientOrders[0].client;
+                                        if (client) {
+                                            setEditingClient(client);
+                                            setClientForm(client);
+                                        }
+                                    }}
                                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                 >
                                     <Eye className="w-5 h-5" />
-                                </Link>
+                                </button>
                             </div>
                         </div>
 
@@ -294,7 +324,15 @@ export default function DataReviewDashboard() {
                                                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                                                         <td className="px-4 py-3">
                                                             <div className="flex flex-col">
-                                                                <span className="font-bold text-gray-900">#{item.id}</span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-bold text-gray-900">#{item.id}</span>
+                                                                    {item.individualClient && (
+                                                                        <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-bold">
+                                                                            <User className="w-2.5 h-2.5" />
+                                                                            {item.individualClient}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                                 <span className="text-[10px] text-gray-400 font-medium">{item.material || 'Carpet'} • {item.state}</span>
                                                             </div>
                                                         </td>
@@ -314,6 +352,117 @@ export default function DataReviewDashboard() {
                     </div>
                 ))}
             </div>
+
+            {/* Client Details Modal */}
+            {editingClient && clientForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setEditingClient(null)}>
+                    <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-xl font-bold mb-4">Client Information</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <input
+                                    type="text"
+                                    value={clientForm.name}
+                                    onChange={e => setClientForm({...clientForm, name: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                                <input
+                                    type="tel"
+                                    value={clientForm.phone || ''}
+                                    onChange={e => setClientForm({...clientForm, phone: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <input
+                                    type="email"
+                                    value={clientForm.email || ''}
+                                    onChange={e => setClientForm({...clientForm, email: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Street</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.street || ''}
+                                        onChange={e => setClientForm({...clientForm, street: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Number</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.number || ''}
+                                        onChange={e => setClientForm({...clientForm, number: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.postalCode || ''}
+                                        onChange={e => setClientForm({...clientForm, postalCode: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">City</label>
+                                    <input
+                                        type="text"
+                                        value={clientForm.city || ''}
+                                        onChange={e => setClientForm({...clientForm, city: e.target.value})}
+                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Country</label>
+                                <input
+                                    type="text"
+                                    value={clientForm.country || ''}
+                                    onChange={e => setClientForm({...clientForm, country: e.target.value})}
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex space-x-3 mt-6">
+                            <button
+                                onClick={saveClientInfo}
+                                className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setEditingClient(null);
+                                    setClientForm(null);
+                                }}
+                                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
