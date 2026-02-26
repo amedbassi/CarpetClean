@@ -25,8 +25,9 @@ export default function OperationsDashboard() {
                     orderId,
                     requiresCleaningApproval: !currentVal,
                     requiresRepairApproval: !currentVal,
-                    cleaningApprovalStatus: !currentVal ? 'pending' : 'not_needed',
-                    repairApprovalStatus: !currentVal ? 'pending' : 'not_needed'
+                    // Keep status as 'not_needed' until estimate is actually sent
+                    cleaningApprovalStatus: 'not_needed',
+                    repairApprovalStatus: 'not_needed'
                 }),
             });
 
@@ -52,6 +53,14 @@ export default function OperationsDashboard() {
                 setClientForm(order.client);
             }
             return;
+        }
+
+        // Copy link to clipboard first (as backup)
+        const approvalLink = `${window.location.origin}/approve/${order.id}`;
+        try {
+            await navigator.clipboard.writeText(approvalLink);
+        } catch (err) {
+            console.error('Failed to copy to clipboard:', err);
         }
 
         // Update the cleaning approval status to pending
@@ -84,11 +93,12 @@ export default function OperationsDashboard() {
                 throw new Error(errorData.error || 'Failed to send email');
             }
 
-            alert(`✅ Cleaning estimate sent successfully!\n\nEmail sent to: ${order.client.email}`);
+            alert(`✅ Cleaning estimate sent successfully!\n\nEmail sent to: ${order.client.email}\n\n📋 Link also copied to clipboard as backup.`);
             loadOrders();
         } catch (error) {
             console.error('Error sending cleaning estimate:', error);
-            alert(`Failed to send cleaning estimate: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            alert(`⚠️ Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}\n\n📋 However, the approval link has been copied to your clipboard.\n\nYou can manually send it to: ${order.client.email}`);
+            loadOrders();
         }
     };
 

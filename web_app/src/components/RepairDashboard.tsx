@@ -32,6 +32,14 @@ export default function RepairDashboard() {
             return;
         }
 
+        // Copy link to clipboard first (as backup)
+        const approvalLink = `${window.location.origin}/approve/${order.id}`;
+        try {
+            await navigator.clipboard.writeText(approvalLink);
+        } catch (err) {
+            console.error('Failed to copy to clipboard:', err);
+        }
+
         // Update the repair approval status to pending
         try {
             const response = await fetch('/api/orders/update', {
@@ -62,11 +70,12 @@ export default function RepairDashboard() {
                 throw new Error(errorData.error || 'Failed to send email');
             }
 
-            alert(`✅ Repair estimate sent successfully!\n\nEmail sent to: ${order.client.email}`);
+            alert(`✅ Repair estimate sent successfully!\n\nEmail sent to: ${order.client.email}\n\n📋 Link also copied to clipboard as backup.`);
             window.location.reload();
         } catch (error) {
             console.error('Error sending repair estimate:', error);
-            alert(`Failed to send repair estimate: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            alert(`⚠️ Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}\n\n📋 However, the approval link has been copied to your clipboard.\n\nYou can manually send it to: ${order.client.email}`);
+            window.location.reload();
         }
     };
 
