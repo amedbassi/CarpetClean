@@ -23,6 +23,18 @@ export default function DeliveryDashboard() {
     const handleOptimize = async () => {
         if (selectedIds.length < 2) return;
 
+        // Check if all selected orders have client addresses
+        const selectedOrders = readyOrders.filter(order => selectedIds.includes(order.id));
+        const ordersWithoutAddress = selectedOrders.filter(order => 
+            !order.client?.postalCode || !order.client?.city || !order.client?.street
+        );
+
+        if (ordersWithoutAddress.length > 0) {
+            const clientNames = ordersWithoutAddress.map(o => o.client?.name || 'Unknown').join(', ');
+            alert(`❌ Cannot optimize route!\n\nThe following clients are missing address information:\n${clientNames}\n\nPlease add complete addresses (street, postal code, city) for these clients before optimizing the route.`);
+            return;
+        }
+
         setOptimizing(true);
         try {
             const response = await fetch('/api/delivery/optimize-route', {
