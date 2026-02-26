@@ -4,15 +4,20 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Hammer, CheckCircle, AlertTriangle, Mail, Edit } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
+import { Client, Order, CarpetItem } from '@/lib/types';
+
+interface RepairOrder extends Order {
+    repairItems: CarpetItem[];
+}
 
 export default function RepairDashboard() {
     const { orders, loading } = useOrders();
-    const [editingClient, setEditingClient] = useState<any>(null);
-    const [clientForm, setClientForm] = useState<any>(null);
+    const [editingClient, setEditingClient] = useState<Client | null>(null);
+    const [clientForm, setClientForm] = useState<Client | null>(null);
 
-    const sendRepairApprovalRequest = async (order: any) => {
+    const sendRepairApprovalRequest = async (order: RepairOrder) => {
         // Check if any items have repair costs
-        const hasRepairItems = order.items.some((item: any) => (item.repairCost || 0) > 0);
+        const hasRepairItems = order.repairItems.some(item => (item.repairCost || 0) > 0);
         if (!hasRepairItems) {
             alert('No repair estimates found. Please add repair costs to items that need repair.');
             return;
@@ -58,7 +63,7 @@ export default function RepairDashboard() {
     if (loading) return <div className="p-8 text-center text-gray-500 font-medium">Loading repair requests...</div>;
 
     // Group repair items by order
-    const repairOrdersMap = new Map();
+    const repairOrdersMap = new Map<string, RepairOrder>();
     orders.forEach(order => {
         const repairItems = order.items.filter(item =>
             ['Worn', 'Damaged'].includes(item.state || '') ||
@@ -123,8 +128,9 @@ export default function RepairDashboard() {
                                     
                                     <button
                                         onClick={() => sendRepairApprovalRequest(order)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold"
-                                        title="Send Repair Estimate"
+                                        disabled={!order.repairItems.some(item => (item.repairCost || 0) > 0)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+                                        title={order.repairItems.some(item => (item.repairCost || 0) > 0) ? "Send Repair Estimate" : "Add repair estimates first"}
                                     >
                                         <Mail className="w-3 h-3" />
                                         Send Repair
@@ -134,7 +140,7 @@ export default function RepairDashboard() {
                         </div>
 
                         <div className="divide-y divide-gray-50">
-                            {order.repairItems.map((item: any) => (
+                            {order.repairItems.map(item => (
                                 <div key={item.id} className="p-5 hover:bg-gray-50/50 transition-colors">
                                     <div className="flex items-center justify-between mb-3">
                                         <div className="flex items-center space-x-3">
