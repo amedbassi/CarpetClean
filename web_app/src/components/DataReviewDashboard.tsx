@@ -90,6 +90,7 @@ export default function DataReviewDashboard() {
                     order.client?.name || 'Unknown',
                     order.id,
                     item.id,
+                    item.individualClient || '',
                     item.status || 'pending',
                     (order.requiresCleaningApproval || order.requiresRepairApproval)
                         ? (order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved' ? 'approved' :

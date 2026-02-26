@@ -24,6 +24,7 @@ export interface CarpetItem {
     cleaningCost: number | null;
     repairCost: number | null;
     repairDescription: string | null;
+    individualClient: string | null;
 }
 
 export interface Order {
@@ -36,6 +37,7 @@ export interface Order {
     repairApprovalStatus: ApprovalStatus;
     signature: string | null;
     receipt: string | null;
+    deliverySignature: string | null;
     client?: Client;
     items: CarpetItem[];
 }
