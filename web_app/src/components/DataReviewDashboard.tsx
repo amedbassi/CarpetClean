@@ -172,7 +172,7 @@ export default function DataReviewDashboard() {
 
             {/* Managerial Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div className="lg:col-span-3 premium-card p-6 space-y-6">
+                <div className="lg:col-span-2 premium-card p-6 space-y-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
                             <BarChart3 className="w-4 h-4 text-blue-600" />
@@ -183,7 +183,7 @@ export default function DataReviewDashboard() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
+                    <div className="grid grid-cols-1 gap-y-5">
                         {['pending', 'measured', 'ready_for_delivery', 'delivered'].map(status => {
                             const count = analytics.statusCounts[status] || 0;
                             const percentage = (count / analytics.totalItemsCount) * 100;
@@ -210,7 +210,7 @@ export default function DataReviewDashboard() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 bg-gray-900 text-white p-7 rounded-2xl shadow-xl flex flex-col relative overflow-hidden group">
+                <div className="lg:col-span-3 bg-gray-900 text-white p-7 rounded-2xl shadow-xl flex flex-col relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-500/20 transition-colors"></div>
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 text-gray-500">Top Swiss Accounts</h3>
                     <div className="flex-1 space-y-5 relative z-10">
