@@ -175,9 +175,18 @@ export default function RepairDashboard() {
                                     
                                     <button
                                         onClick={() => sendRepairApprovalRequest(order)}
-                                        disabled={!order.repairItems.some(item => (item.repairCost || 0) > 0)}
+                                        disabled={
+                                            !order.repairItems.some(item => (item.repairCost || 0) > 0) ||
+                                            (order.repairApprovalStatus === 'pending' || order.repairApprovalStatus === 'approved')
+                                        }
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
-                                        title={order.repairItems.some(item => (item.repairCost || 0) > 0) ? "Send Repair Estimate" : "Add repair estimates first"}
+                                        title={
+                                            !order.repairItems.some(item => (item.repairCost || 0) > 0)
+                                                ? "Add repair estimates first"
+                                                : (order.repairApprovalStatus === 'pending' || order.repairApprovalStatus === 'approved')
+                                                ? "Estimate already sent"
+                                                : "Send Repair Estimate"
+                                        }
                                     >
                                         <Mail className="w-3 h-3" />
                                         Send Repair

@@ -42,6 +42,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
         e.preventDefault();
 
         try {
+            // First, update the item with new repair estimate
             const response = await fetch('/api/operations/update-item', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -54,12 +55,26 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 }),
             });
 
-            if (response.ok) {
-                alert('Repair estimate saved!');
-                router.push('/repair');
-            } else {
-                alert('Failed to save estimate');
+            if (!response.ok) {
+                throw new Error('Failed to save estimate');
             }
+
+            // Reset repair approval status to 'not_needed' so the estimate can be sent again
+            const resetResponse = await fetch('/api/orders/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId,
+                    repairApprovalStatus: 'not_needed'
+                }),
+            });
+
+            if (!resetResponse.ok) {
+                console.warn('Failed to reset approval status, but estimate was saved');
+            }
+
+            alert('Repair estimate saved! You can now send it to the client.');
+            router.push('/repair');
         } catch (error) {
             console.error(error);
             alert('Error saving estimate');
