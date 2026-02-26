@@ -38,7 +38,7 @@ export default function OperationsDashboard() {
         }
     };
 
-    const sendApprovalRequest = async (order: Order) => {
+    const sendCleaningApprovalRequest = async (order: Order) => {
         const allMeasured = order.items.every(item => item.status === 'measured' || item.status === 'ready_for_delivery' || item.status === 'delivered');
         if (!allMeasured) {
             alert('All carpets must be measured before sending the cleaning estimate for approval.');
@@ -56,7 +56,7 @@ export default function OperationsDashboard() {
 
         const approvalLink = `${window.location.origin}/approve/${order.id}`;
         navigator.clipboard.writeText(approvalLink);
-        alert(`Approval link copied to clipboard for ${order.client.name}!`);
+        alert(`Cleaning estimate approval link copied to clipboard!\n\nSend to: ${order.client.name}\nEmail: ${order.client.email || 'N/A'}\nPhone: ${order.client.phone || 'N/A'}`);
     };
 
     const saveClientInfo = async () => {
@@ -143,19 +143,30 @@ export default function OperationsDashboard() {
 
                                 {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved')
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-orange-100 text-orange-700'
+                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
+                                            order.cleaningApprovalStatus === 'approved' 
+                                                ? 'bg-green-100 text-green-700'
+                                                : order.cleaningApprovalStatus === 'rejected'
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-orange-100 text-orange-700'
                                             }`}>
-                                            {order.cleaningApprovalStatus === 'approved' ? 'Approved' : 'Pending'}
+                                            {order.cleaningApprovalStatus === 'approved' 
+                                                ? 'Approved' 
+                                                : order.cleaningApprovalStatus === 'rejected'
+                                                ? 'Rejected'
+                                                : 'Pending'}
                                         </span>
-                                        <button
-                                            onClick={() => sendApprovalRequest(order)}
-                                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                                            title="Send/Copy Approval Link"
-                                        >
-                                            <Mail className="w-3.5 h-3.5" />
-                                        </button>
+                                        
+                                        {order.requiresCleaningApproval && (
+                                            <button
+                                                onClick={() => sendCleaningApprovalRequest(order)}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-xs font-bold"
+                                                title="Send Cleaning Estimate"
+                                            >
+                                                <Mail className="w-3 h-3" />
+                                                Send Cleaning
+                                            </button>
+                                        )}
                                     </div>
                                 )}
                             </div>
