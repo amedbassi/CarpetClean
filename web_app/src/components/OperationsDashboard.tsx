@@ -24,10 +24,8 @@ export default function OperationsDashboard() {
                 body: JSON.stringify({
                     orderId,
                     requiresCleaningApproval: !currentVal,
-                    requiresRepairApproval: !currentVal,
                     // Keep status as 'not_needed' until estimate is actually sent
                     cleaningApprovalStatus: 'not_needed',
-                    repairApprovalStatus: 'not_needed'
                 }),
             });
 
@@ -177,14 +175,14 @@ export default function OperationsDashboard() {
                                 <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
                                     <input
                                         type="checkbox"
-                                        checked={order.requiresCleaningApproval || order.requiresRepairApproval}
-                                        onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval || order.requiresRepairApproval)}
+                                        checked={order.requiresCleaningApproval}
+                                        onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval)}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
-                                    Approval Flow
+                                    Cleaning Approval
                                 </label>
 
-                                {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
+                                {order.requiresCleaningApproval && (
                                     <div className="flex items-center gap-2">
                                         {/* Only show status badge if estimate has been sent (not "not_needed") */}
                                         {order.cleaningApprovalStatus !== 'not_needed' && (
@@ -236,7 +234,7 @@ export default function OperationsDashboard() {
                                             {item.status === 'measured' && (
                                                 <button
                                                     onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
-                                                    disabled={(order.requiresCleaningApproval || order.requiresRepairApproval) && (order.cleaningApprovalStatus !== 'approved')}
+                                                    disabled={order.requiresCleaningApproval && (order.cleaningApprovalStatus !== 'approved')}
                                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-green-100 disabled:opacity-50 disabled:grayscale"
                                                 >
                                                     <CheckCircle className="w-3 h-3" />

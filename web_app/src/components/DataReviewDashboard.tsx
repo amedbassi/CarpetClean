@@ -184,14 +184,13 @@ export default function DataReviewDashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
-                        {['pending', 'cleaning', 'cleaned', 'ready_for_delivery', 'delivered'].map(status => {
+                        {['pending', 'measured', 'ready_for_delivery', 'delivered'].map(status => {
                             const count = analytics.statusCounts[status] || 0;
                             const percentage = (count / analytics.totalItemsCount) * 100;
                             const colorClass =
                                 status === 'delivered' ? 'bg-gray-200' :
                                     status === 'ready_for_delivery' ? 'bg-green-500' :
-                                        status === 'cleaning' ? 'bg-blue-500' :
-                                            status === 'cleaned' ? 'bg-cyan-500' : 'bg-yellow-400';
+                                        status === 'measured' ? 'bg-blue-500' : 'bg-yellow-400';
 
                             return (
                                 <div key={status} className="group">
@@ -255,9 +254,11 @@ export default function DataReviewDashboard() {
                         >
                             <option value="all">All Statuses</option>
                             <option value="pending">Waiting</option>
-                            <option value="cleaning">Cleaning</option>
+                            <option value="measured">Measured</option>
                             <option value="ready_for_delivery">Ready</option>
                             <option value="delivered">Delivered</option>
+                            <option value="pending_approval">Pending Approval</option>
+                            <option value="approved">Approved</option>
                         </select>
                     </div>
                 </div>
