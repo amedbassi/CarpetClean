@@ -20,15 +20,32 @@ export default function DeliveryDashboard() {
         );
     };
 
-    const handleOptimize = () => {
+    const handleOptimize = async () => {
         if (selectedIds.length < 2) return;
 
         setOptimizing(true);
-        setTimeout(() => {
-            const optimized = [...selectedIds].sort();
-            setOptimizedSequence(optimized);
+        try {
+            const response = await fetch('/api/delivery/optimize-route', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderIds: selectedIds })
+            });
+
+            if (!response.ok) throw new Error('Optimization failed');
+
+            const data = await response.json();
+            setOptimizedSequence(data.optimizedRoute);
+            
+            // Show success message with stats
+            if (data.stats) {
+                alert(`Route optimized! 🎯\n\nStops: ${data.stats.totalStops}\nTime saved: ${data.stats.estimatedTimeSaved}\nEfficiency: ${data.stats.routeEfficiency} better`);
+            }
+        } catch (error) {
+            console.error('Optimization error:', error);
+            alert('Failed to optimize route. Please try again.');
+        } finally {
             setOptimizing(false);
-        }, 1500);
+        }
     };
 
     const handleCompleteDelivery = async () => {
@@ -109,7 +126,23 @@ export default function DeliveryDashboard() {
 
             {/* Orders List */}
             <div className="grid gap-4">
-                {readyOrders.map(order => (
+                {readyOrders
+                    .sort((a, b) => {
+                        // If we have an optimized sequence, sort by it
+                        if (optimizedSequence && optimizedSequence.length > 0) {
+                            const indexA = optimizedSequence.indexOf(a.id);
+                            const indexB = optimizedSequence.indexOf(b.id);
+                            if (indexA !== -1 && indexB !== -1) {
+                                return indexA - indexB;
+                            }
+                        }
+                        return 0;
+                    })
+                    .map((order, index) => {
+                        const isOptimized = optimizedSequence && optimizedSequence.includes(order.id);
+                        const sequenceNumber = isOptimized ? optimizedSequence.indexOf(order.id) + 1 : null;
+                        
+                        return (
                     <div
                         key={order.id}
                         onClick={() => toggleSelection(order.id)}
@@ -120,6 +153,11 @@ export default function DeliveryDashboard() {
                     >
                         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-start space-x-4">
+                                {sequenceNumber && (
+                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
+                                        {sequenceNumber}
+                                    </div>
+                                )}
                                 <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-colors ${selectedIds.includes(order.id)
                                     ? 'bg-blue-600 border-blue-600'
                                     : 'bg-white border-gray-200 group-hover:border-blue-400'
@@ -175,7 +213,8 @@ export default function DeliveryDashboard() {
                             </div>
                         </div>
                     </div>
-                ))}
+                        );
+                    })}
             </div>
 
             {readyOrders.length === 0 && (
