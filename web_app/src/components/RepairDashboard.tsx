@@ -106,32 +106,30 @@ export default function RepairDashboard() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                                {order.requiresRepairApproval && (
-                                    <div className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
-                                            order.repairApprovalStatus === 'approved'
-                                                ? 'bg-green-100 text-green-700'
-                                                : order.repairApprovalStatus === 'rejected'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-orange-100 text-orange-700'
-                                            }`}>
-                                            {order.repairApprovalStatus === 'approved'
-                                                ? 'Approved'
-                                                : order.repairApprovalStatus === 'rejected'
-                                                ? 'Rejected'
-                                                : 'Pending'}
-                                        </span>
-                                        
-                                        <button
-                                            onClick={() => sendRepairApprovalRequest(order)}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold"
-                                            title="Send Repair Estimate"
-                                        >
-                                            <Mail className="w-3 h-3" />
-                                            Send Repair
-                                        </button>
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
+                                        order.repairApprovalStatus === 'approved'
+                                            ? 'bg-green-100 text-green-700'
+                                            : order.repairApprovalStatus === 'rejected'
+                                            ? 'bg-red-100 text-red-700'
+                                            : 'bg-orange-100 text-orange-700'
+                                        }`}>
+                                        {order.repairApprovalStatus === 'approved'
+                                            ? 'Approved'
+                                            : order.repairApprovalStatus === 'rejected'
+                                            ? 'Rejected'
+                                            : 'Pending'}
+                                    </span>
+                                    
+                                    <button
+                                        onClick={() => sendRepairApprovalRequest(order)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold"
+                                        title="Send Repair Estimate"
+                                    >
+                                        <Mail className="w-3 h-3" />
+                                        Send Repair
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
