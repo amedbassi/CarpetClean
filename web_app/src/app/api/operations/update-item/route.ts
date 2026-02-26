@@ -5,6 +5,15 @@ export async function POST(request: Request) {
     try {
         const { orderId, itemId, ...updates } = await request.json();
 
+        // Prevent individual items from being marked as delivered
+        // Items can only be delivered through the delivery completion flow
+        if (updates.status === 'delivered') {
+            return NextResponse.json(
+                { success: false, message: 'Items cannot be individually marked as delivered. Use the delivery completion flow.' },
+                { status: 400 }
+            );
+        }
+
         // Update the item in the database
         const updatedItem = await prisma.carpetItem.update({
             where: {
