@@ -54,9 +54,32 @@ export default function OperationsDashboard() {
             return;
         }
 
+        // Update the cleaning approval status to pending
+        try {
+            const response = await fetch('/api/orders/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    cleaningApprovalStatus: 'pending'
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update status');
+            }
+        } catch (error) {
+            console.error('Error updating cleaning approval status:', error);
+            alert('Failed to update approval status');
+            return;
+        }
+
         const approvalLink = `${window.location.origin}/approve/${order.id}`;
         navigator.clipboard.writeText(approvalLink);
         alert(`Cleaning estimate approval link copied to clipboard!\n\nSend to: ${order.client.name}\nEmail: ${order.client.email || 'N/A'}\nPhone: ${order.client.phone || 'N/A'}`);
+        
+        // Reload to show updated status
+        loadOrders();
     };
 
     const saveClientInfo = async () => {
@@ -143,19 +166,22 @@ export default function OperationsDashboard() {
 
                                 {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
-                                            order.cleaningApprovalStatus === 'approved' 
-                                                ? 'bg-green-100 text-green-700'
-                                                : order.cleaningApprovalStatus === 'rejected'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-orange-100 text-orange-700'
-                                            }`}>
-                                            {order.cleaningApprovalStatus === 'approved' 
-                                                ? 'Approved' 
-                                                : order.cleaningApprovalStatus === 'rejected'
-                                                ? 'Rejected'
-                                                : 'Pending'}
-                                        </span>
+                                        {/* Only show status badge if estimate has been sent (not "not_needed") */}
+                                        {order.cleaningApprovalStatus !== 'not_needed' && (
+                                            <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
+                                                order.cleaningApprovalStatus === 'approved' 
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : order.cleaningApprovalStatus === 'rejected'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-orange-100 text-orange-700'
+                                                }`}>
+                                                {order.cleaningApprovalStatus === 'approved' 
+                                                    ? 'Approved' 
+                                                    : order.cleaningApprovalStatus === 'rejected'
+                                                    ? 'Rejected'
+                                                    : 'Pending'}
+                                            </span>
+                                        )}
                                         
                                         {order.requiresCleaningApproval && (
                                             <button

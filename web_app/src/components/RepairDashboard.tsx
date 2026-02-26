@@ -32,9 +32,32 @@ export default function RepairDashboard() {
             return;
         }
 
+        // Update the repair approval status to pending
+        try {
+            const response = await fetch('/api/orders/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    repairApprovalStatus: 'pending'
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update status');
+            }
+        } catch (error) {
+            console.error('Error updating repair approval status:', error);
+            alert('Failed to update approval status');
+            return;
+        }
+
         const approvalLink = `${window.location.origin}/approve/${order.id}`;
         navigator.clipboard.writeText(approvalLink);
         alert(`Repair estimate approval link copied to clipboard!\n\nSend to: ${order.client.name}\nEmail: ${order.client.email || 'N/A'}\nPhone: ${order.client.phone || 'N/A'}`);
+        
+        // Reload to show updated status
+        window.location.reload();
     };
 
     const saveClientInfo = async () => {
@@ -112,19 +135,22 @@ export default function RepairDashboard() {
 
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
-                                        order.repairApprovalStatus === 'approved'
-                                            ? 'bg-green-100 text-green-700'
-                                            : order.repairApprovalStatus === 'rejected'
-                                            ? 'bg-red-100 text-red-700'
-                                            : 'bg-orange-100 text-orange-700'
-                                        }`}>
-                                        {order.repairApprovalStatus === 'approved'
-                                            ? 'Approved'
-                                            : order.repairApprovalStatus === 'rejected'
-                                            ? 'Rejected'
-                                            : 'Pending'}
-                                    </span>
+                                    {/* Only show status badge if estimate has been sent (not "not_needed") */}
+                                    {order.repairApprovalStatus !== 'not_needed' && (
+                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${
+                                            order.repairApprovalStatus === 'approved'
+                                                ? 'bg-green-100 text-green-700'
+                                                : order.repairApprovalStatus === 'rejected'
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-orange-100 text-orange-700'
+                                            }`}>
+                                            {order.repairApprovalStatus === 'approved'
+                                                ? 'Approved'
+                                                : order.repairApprovalStatus === 'rejected'
+                                                ? 'Rejected'
+                                                : 'Pending'}
+                                        </span>
+                                    )}
                                     
                                     <button
                                         onClick={() => sendRepairApprovalRequest(order)}
