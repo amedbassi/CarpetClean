@@ -63,17 +63,21 @@ model CarpetItem {
 }
 
 model Settings {
-  id                    String   @id @default("default")
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-  pricePerSquareMeter   Float    @default(25.0)
-  repairHourlyRate      Float    @default(50.0)
-  taxRate               Float    @default(7.7)
-  currency              String   @default("CHF")
-  emailFrom             String?
-  emailHost             String?
-  emailPort             Int?
-  emailUser             String?
-  emailPassword         String?
-  emailSecure           Boolean  @default(true)
+  id               String   @id @default("default")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  priceWool        Float    @default(27.0)
+  priceSilk        Float    @default(47.0)
+  priceCotton      Float    @default(24.0)
+  priceSynthetic   Float    @default(20.0)
+  priceOther       Float    @default(30.0)
+  repairHourlyRate Float    @default(50.0)
+  taxRate          Float    @default(7.7)
+  currency         String   @default("CHF")
+  emailFrom        String?
+  emailHost        String?
+  emailPort        Int?
+  emailUser        String?
+  emailPassword    String?
+  emailSecure      Boolean  @default(true)
 }

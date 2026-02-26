@@ -12,7 +12,11 @@ export async function GET() {
             settings = await prisma.settings.create({
                 data: {
                     id: 'default',
-                    pricePerSquareMeter: 25.0,
+                    priceWool: 27.0,
+                    priceSilk: 47.0,
+                    priceCotton: 24.0,
+                    priceSynthetic: 20.0,
+                    priceOther: 30.0,
                     repairHourlyRate: 50.0,
                     taxRate: 7.7,
                     currency: 'CHF',

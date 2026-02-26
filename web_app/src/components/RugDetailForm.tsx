@@ -24,15 +24,43 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
         length: '',
         width: '',
         state: 'Good',
-        material: 'Synthetic',
+        material: 'Wool',
         photo: null as File | null,
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
     const [individualClient, setIndividualClient] = useState<string | null>(null);
-
     const [cleaningCost, setCleaningCost] = useState(0);
+    const [pricingRates, setPricingRates] = useState({
+        Wool: 27,
+        Silk: 47,
+        Cotton: 24,
+        Synthetic: 20,
+        Other: 30,
+    });
+
+    useEffect(() => {
+        // Fetch pricing settings
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch('/api/settings');
+                if (response.ok) {
+                    const settings = await response.json();
+                    setPricingRates({
+                        Wool: settings.priceWool || 27,
+                        Silk: settings.priceSilk || 47,
+                        Cotton: settings.priceCotton || 24,
+                        Synthetic: settings.priceSynthetic || 20,
+                        Other: settings.priceOther || 30,
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load pricing settings:', err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     useEffect(() => {
         const fetchRugData = async () => {
@@ -47,7 +75,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         length: item.length || '',
                         width: item.width || '',
                         state: item.state || 'Good',
-                        material: item.material || 'Synthetic',
+                        material: item.material || 'Wool',
                         photo: null,
                     });
                     setExistingPhoto(item.photo || null);
@@ -69,20 +97,12 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
         const w = parseFloat(formData.width);
         if (!isNaN(l) && !isNaN(w) && l > 0 && w > 0) {
             const area = l * w;
-            let rate = 20; // Default
-            switch (formData.material) {
-                case 'Wool': rate = 20; break;
-                case 'Silk': rate = 50; break;
-                case 'Synthetic': rate = 15; break;
-                case 'Cotton': rate = 20; break;
-                case 'Blend': rate = 15; break;
-                case 'Unknown': rate = 20; break;
-            }
+            const rate = pricingRates[formData.material as keyof typeof pricingRates] || pricingRates.Other;
             setCleaningCost(Number((area * rate).toFixed(2)));
         } else {
             setCleaningCost(0);
         }
-    }, [formData.length, formData.width, formData.material]);
+    }, [formData.length, formData.width, formData.material, pricingRates]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -238,12 +258,11 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                             value={formData.material}
                             onChange={e => setFormData(prev => ({ ...prev, material: e.target.value }))}
                         >
-                            <option value="Synthetic">Synthetic</option>
                             <option value="Wool">Wool</option>
                             <option value="Silk">Silk</option>
                             <option value="Cotton">Cotton</option>
-                            <option value="Blend">Blend</option>
-                            <option value="Unknown">Unknown</option>
+                            <option value="Synthetic">Synthetic</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 

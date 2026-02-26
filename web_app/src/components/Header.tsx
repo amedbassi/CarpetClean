@@ -6,7 +6,11 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 
 interface SettingsData {
-    pricePerSquareMeter: number;
+    priceWool: number;
+    priceSilk: number;
+    priceCotton: number;
+    priceSynthetic: number;
+    priceOther: number;
     repairHourlyRate: number;
     taxRate: number;
     currency: string;
@@ -21,7 +25,11 @@ export default function Header() {
     const pathname = usePathname();
     const [showSettings, setShowSettings] = useState(false);
     const [settings, setSettings] = useState<SettingsData>({
-        pricePerSquareMeter: 25.0,
+        priceWool: 27.0,
+        priceSilk: 47.0,
+        priceCotton: 24.0,
+        priceSynthetic: 20.0,
+        priceOther: 30.0,
         repairHourlyRate: 50.0,
         taxRate: 7.7,
         currency: 'CHF',
@@ -172,28 +180,102 @@ export default function Header() {
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
                                                 <DollarSign className="w-4 h-4" />
-                                                Pricing
+                                                Cleaning Prices (per m²)
                                             </div>
                                             
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    Cleaning (per m²)
-                                                </label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="number"
-                                                        step="0.1"
-                                                        value={settings.pricePerSquareMeter}
-                                                        onChange={e => setSettings({ ...settings, pricePerSquareMeter: parseFloat(e.target.value) })}
-                                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
-                                                    />
-                                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
-                                                        {settings.currency}
-                                                    </span>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                        Wool
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={settings.priceWool}
+                                                            onChange={e => setSettings({ ...settings, priceWool: parseFloat(e.target.value) })}
+                                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                                                            {settings.currency}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                        Silk
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={settings.priceSilk}
+                                                            onChange={e => setSettings({ ...settings, priceSilk: parseFloat(e.target.value) })}
+                                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                                                            {settings.currency}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                        Cotton
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={settings.priceCotton}
+                                                            onChange={e => setSettings({ ...settings, priceCotton: parseFloat(e.target.value) })}
+                                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                                                            {settings.currency}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                        Synthetic
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={settings.priceSynthetic}
+                                                            onChange={e => setSettings({ ...settings, priceSynthetic: parseFloat(e.target.value) })}
+                                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                                                            {settings.currency}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                        Other
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={settings.priceOther}
+                                                            onChange={e => setSettings({ ...settings, priceOther: parseFloat(e.target.value) })}
+                                                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-semibold"
+                                                        />
+                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">
+                                                            {settings.currency}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 pt-2">
                                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                                     Repair (hourly)
                                                 </label>
