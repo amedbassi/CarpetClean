@@ -33,8 +33,6 @@ export default function Header() {
     });
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
         if (showSettings) {
             loadSettings();
