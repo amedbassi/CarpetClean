@@ -60,15 +60,15 @@ START
                          ▼
                 ┌──────────────────┐
                 │  4. DELIVERY     │  Page: /delivery
-                │                  │  - Select orders
-                │  Optimize Route  │  - AI route optimization
-                │  Complete        │  - Capture signature
-                │  Delivery        │  - Mark delivered
-                │                  │
-                │  Status:         │
+                │                  │  - Shows orders where ALL items
+                │  Optimize Route  │    are ready_for_delivery
+                │  Complete        │  - Select orders
+                │  Delivery        │  - AI route optimization
+                │                  │  - Capture signature
+                │  Status:         │  - Mark ALL items delivered
                 │  ready_for_      │
-                │  delivery →      │
-                │  delivered       │
+                │  delivery →      │  IMPORTANT: Orders only appear
+                │  delivered       │  when ALL items are ready
                 └────────┬─────────┘
                          │
                          ▼
@@ -389,7 +389,60 @@ NOTE: Repair approval is INDEPENDENT
 
 ---
 
-## 7. CURRENT ISSUE ANALYSIS
+## 7. DELIVERY PAGE LOGIC
+
+### Order Visibility Rules
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                   DELIVERY PAGE FILTER LOGIC                         │
+└─────────────────────────────────────────────────────────────────────┘
+
+Order appears in Delivery Dashboard ONLY when:
+  ✓ Order has at least 1 item
+  AND
+  ✓ ALL items have status = 'ready_for_delivery' OR 'delivered'
+
+Examples:
+
+Order A:
+  Item 1: ready_for_delivery ✓
+  Item 2: ready_for_delivery ✓
+  Item 3: ready_for_delivery ✓
+  → SHOWS in Delivery Dashboard ✅
+
+Order B:
+  Item 1: ready_for_delivery ✓
+  Item 2: measured ✗
+  Item 3: ready_for_delivery ✓
+  → HIDDEN from Delivery Dashboard ❌
+  (Reason: Item 2 is not ready yet)
+
+Order C:
+  Item 1: delivered ✓
+  Item 2: delivered ✓
+  → SHOWS in Delivery Dashboard ✅
+  (Already delivered orders can still appear)
+```
+
+### Complete Delivery Action
+
+```
+When "Complete delivery" is clicked:
+  1. User signs the delivery
+  2. ALL items in the order are marked as 'delivered'
+  3. Signature is saved to the order
+  4. Order remains visible (all items now 'delivered')
+
+IMPORTANT:
+  - Items cannot be delivered individually
+  - The entire order is delivered as one unit
+  - One signature covers all items in the order
+```
+
+---
+
+## 8. CURRENT ISSUE ANALYSIS
 
 ### Issue: "Mark Ready" Greyed Out in Order 39
 

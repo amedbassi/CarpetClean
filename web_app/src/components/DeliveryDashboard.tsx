@@ -97,8 +97,11 @@ export default function DeliveryDashboard() {
         </div>
     );
 
-    // Only orders that have items ready for delivery
-    const readyOrders = orders.filter(o => o.items.some(i => i.status === 'ready_for_delivery'));
+    // Only orders where ALL items are ready for delivery (not just some)
+    const readyOrders = orders.filter(o => 
+        o.items.length > 0 && 
+        o.items.every(i => i.status === 'ready_for_delivery' || i.status === 'delivered')
+    );
 
     return (
         <div className="max-w-4xl mx-auto p-4 space-y-8 page-transition">
