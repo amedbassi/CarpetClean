@@ -45,8 +45,8 @@ export default function OperationsDashboard() {
             return;
         }
 
-        if (!order.client?.email && !order.client?.phone) {
-            alert('Client must have email or phone number to send the cleaning estimate.');
+        if (!order.client?.email) {
+            alert('Client must have an email address to send the cleaning estimate.');
             if (order.client) {
                 setEditingClient(order.client);
                 setClientForm(order.client);
@@ -68,18 +68,28 @@ export default function OperationsDashboard() {
             if (!response.ok) {
                 throw new Error('Failed to update status');
             }
-        } catch (error) {
-            console.error('Error updating cleaning approval status:', error);
-            alert('Failed to update approval status');
-            return;
-        }
 
-        const approvalLink = `${window.location.origin}/approve/${order.id}`;
-        navigator.clipboard.writeText(approvalLink);
-        alert(`Cleaning estimate approval link copied to clipboard!\n\nSend to: ${order.client.name}\nEmail: ${order.client.email || 'N/A'}\nPhone: ${order.client.phone || 'N/A'}`);
-        
-        // Reload to show updated status
-        loadOrders();
+            // Send email
+            const emailResponse = await fetch('/api/send-estimate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    estimateType: 'cleaning'
+                }),
+            });
+
+            if (!emailResponse.ok) {
+                const errorData = await emailResponse.json();
+                throw new Error(errorData.error || 'Failed to send email');
+            }
+
+            alert(`✅ Cleaning estimate sent successfully!\n\nEmail sent to: ${order.client.email}`);
+            loadOrders();
+        } catch (error) {
+            console.error('Error sending cleaning estimate:', error);
+            alert(`Failed to send cleaning estimate: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     };
 
     const saveClientInfo = async () => {

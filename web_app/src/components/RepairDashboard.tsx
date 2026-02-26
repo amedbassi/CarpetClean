@@ -23,8 +23,8 @@ export default function RepairDashboard() {
             return;
         }
 
-        if (!order.client?.email && !order.client?.phone) {
-            alert('Client must have email or phone number to send the repair estimate.');
+        if (!order.client?.email) {
+            alert('Client must have an email address to send the repair estimate.');
             if (order.client) {
                 setEditingClient(order.client);
                 setClientForm(order.client);
@@ -46,18 +46,28 @@ export default function RepairDashboard() {
             if (!response.ok) {
                 throw new Error('Failed to update status');
             }
-        } catch (error) {
-            console.error('Error updating repair approval status:', error);
-            alert('Failed to update approval status');
-            return;
-        }
 
-        const approvalLink = `${window.location.origin}/approve/${order.id}`;
-        navigator.clipboard.writeText(approvalLink);
-        alert(`Repair estimate approval link copied to clipboard!\n\nSend to: ${order.client.name}\nEmail: ${order.client.email || 'N/A'}\nPhone: ${order.client.phone || 'N/A'}`);
-        
-        // Reload to show updated status
-        window.location.reload();
+            // Send email
+            const emailResponse = await fetch('/api/send-estimate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: order.id,
+                    estimateType: 'repair'
+                }),
+            });
+
+            if (!emailResponse.ok) {
+                const errorData = await emailResponse.json();
+                throw new Error(errorData.error || 'Failed to send email');
+            }
+
+            alert(`✅ Repair estimate sent successfully!\n\nEmail sent to: ${order.client.email}`);
+            window.location.reload();
+        } catch (error) {
+            console.error('Error sending repair estimate:', error);
+            alert(`Failed to send repair estimate: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     };
 
     const saveClientInfo = async () => {
