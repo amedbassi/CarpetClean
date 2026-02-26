@@ -104,20 +104,22 @@ export default function RepairDashboard() {
 
     if (loading) return <div className="p-8 text-center text-gray-500 font-medium">Loading repair requests...</div>;
 
-    // Group repair items by order
+    // Group repair items by order (exclude fully delivered orders)
     const repairOrdersMap = new Map<string, RepairOrder>();
-    orders.forEach(order => {
-        const repairItems = order.items.filter(item =>
-            ['Worn', 'Damaged'].includes(item.state || '') ||
-            ['repair_needed', 'repair_estimated'].includes(item.status || '')
-        );
-        if (repairItems.length > 0) {
-            repairOrdersMap.set(order.id, {
-                ...order,
-                repairItems
-            });
-        }
-    });
+    orders
+        .filter(order => !order.items.every(item => item.status === 'delivered'))
+        .forEach(order => {
+            const repairItems = order.items.filter(item =>
+                ['Worn', 'Damaged'].includes(item.state || '') ||
+                ['repair_needed', 'repair_estimated'].includes(item.status || '')
+            );
+            if (repairItems.length > 0) {
+                repairOrdersMap.set(order.id, {
+                    ...order,
+                    repairItems
+                });
+            }
+        });
 
     const repairOrders = Array.from(repairOrdersMap.values());
 

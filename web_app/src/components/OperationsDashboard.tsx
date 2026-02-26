@@ -151,7 +151,9 @@ export default function OperationsDashboard() {
             </div>
 
             <div className="space-y-6">
-                {orders.map(order => (
+                {orders
+                    .filter(order => !order.items.every(item => item.status === 'delivered'))
+                    .map(order => (
                     <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                         <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
                             <div className="flex items-center gap-6">

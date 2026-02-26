@@ -97,10 +97,11 @@ export default function DeliveryDashboard() {
         </div>
     );
 
-    // Only orders where ALL items are ready for delivery (not just some)
+    // Only orders where ALL items are ready for delivery (not delivered yet)
     const readyOrders = orders.filter(o => 
         o.items.length > 0 && 
-        o.items.every(i => i.status === 'ready_for_delivery' || i.status === 'delivered')
+        o.items.every(i => i.status === 'ready_for_delivery') &&
+        !o.items.every(i => i.status === 'delivered')
     );
 
     return (
