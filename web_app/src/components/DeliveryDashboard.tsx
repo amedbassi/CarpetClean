@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { Truck, MapPin, CheckCircle, Navigation, Sparkles, Loader2, User } from 'lucide-react';
 import SignaturePad from './SignaturePad';
 import { useOrders } from '@/hooks/useOrders';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function DeliveryDashboard() {
+    const { t, language } = useLanguage();
     const { orders, loading, loadOrders } = useOrders();
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [optimizing, setOptimizing] = useState(false);
@@ -31,8 +33,8 @@ export default function DeliveryDashboard() {
         );
 
         if (ordersWithoutAddress.length > 0) {
-            const clientNames = ordersWithoutAddress.map(o => o.client?.name || 'Unknown').join(', ');
-            alert(`❌ Cannot optimize route!\n\nThe following clients are missing address information:\n${clientNames}\n\nPlease add complete addresses (street, postal code, city) for these clients before optimizing the route.`);
+            const clientNames = ordersWithoutAddress.map(o => o.client?.name || t.common.error).join(', ');
+            alert(`${t.delivery.optimization_failed_title}\n\n${t.delivery.missing_address_error(clientNames)}`);
             return;
         }
 
@@ -51,11 +53,11 @@ export default function DeliveryDashboard() {
 
             // Show success message with stats
             if (data.stats) {
-                alert(`Route optimized! 🎯\n\nStops: ${data.stats.totalStops}\nTime saved: ${data.stats.estimatedTimeSaved}\nEfficiency: ${data.stats.routeEfficiency} better`);
+                alert(t.delivery.optimization_success(data.stats.totalStops, data.stats.estimatedTimeSaved, data.stats.routeEfficiency));
             }
         } catch (error) {
             console.error('Optimization error:', error);
-            alert('Failed to optimize route. Please try again.');
+            alert(t.delivery.optimization_failed);
         } finally {
             setOptimizing(false);
         }
@@ -86,10 +88,10 @@ export default function DeliveryDashboard() {
 
             setCompletingOrder(null);
             setSignature(null);
-            alert('Delivery completed successfully!');
+            alert(t.delivery.delivery_completed);
         } catch (err) {
             console.error(err);
-            alert('Error completing delivery. Please try again.');
+            alert(t.delivery.delivery_error);
         } finally {
             setSubmitting(false);
         }
@@ -98,7 +100,7 @@ export default function DeliveryDashboard() {
     if (loading) return (
         <div className="flex flex-col items-center justify-center p-20 space-y-4 page-transition">
             <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
-            <p className="text-gray-500 font-medium">Scanning for ready orders...</p>
+            <p className="text-gray-500 font-medium">{t.delivery.scanning}</p>
         </div>
     );
 
@@ -113,11 +115,11 @@ export default function DeliveryDashboard() {
         <div className="max-w-4xl mx-auto p-4 space-y-8 page-transition">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Delivery Dashboard</h2>
-                    <p className="text-sm text-gray-500 font-medium">Route optimization & item tracking</p>
+                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{t.delivery.dashboard}</h2>
+                    <p className="text-sm text-gray-500 font-medium">{t.delivery.optimization}</p>
                 </div>
                 <div className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100 flex items-center">
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">Ready</span>
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">{t.common.ready}</span>
                     <span className="text-lg font-black text-blue-800 leading-none">{readyOrders.length}</span>
                 </div>
             </div>
@@ -129,7 +131,7 @@ export default function DeliveryDashboard() {
                         <div className="bg-blue-600 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
                             {selectedIds.length}
                         </div>
-                        <span className="font-bold text-gray-700 text-sm">Orders selected for delivery</span>
+                        <span className="font-bold text-gray-700 text-sm">{t.delivery.orders_selected}</span>
                     </div>
                     <button
                         onClick={handleOptimize}
@@ -137,9 +139,9 @@ export default function DeliveryDashboard() {
                         className="w-full md:w-auto flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:scale-100 text-sm"
                     >
                         {optimizing ? (
-                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing Routes...</>
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t.delivery.analyzing_routes}</>
                         ) : (
-                            <><Sparkles className="w-4 h-4 mr-2" /> Smart Optimize Route</>
+                            <><Sparkles className="w-4 h-4 mr-2" /> {t.delivery.optimize}</>
                         )}
                     </button>
                 </div>
@@ -189,22 +191,22 @@ export default function DeliveryDashboard() {
                                             <div className="flex items-center space-x-3">
                                                 <span className="font-mono font-bold text-gray-900 bg-gray-50 px-1.5 py-0.5 rounded text-sm">{order.id}</span>
                                                 <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                                                    {order.items.length} items
+                                                    {t.delivery.items_count(order.items.length)}
                                                 </span>
                                             </div>
-                                            <p className="font-bold text-gray-800">{order.client?.name || 'Unknown Client'}</p>
+                                            <p className="font-bold text-gray-800">{order.client?.name || t.common.error}</p>
                                             <div className="flex items-center text-xs text-gray-400 font-medium">
                                                 <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
                                                 {order.client?.street && order.client?.number
                                                     ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
-                                                    : "No address provided"}
+                                                    : t.delivery.no_address}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex md:flex-col items-center md:items-end justify-between gap-2">
                                         <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                                            {mounted ? new Date(order.createdAt).toLocaleDateString('en-CH') : ''}
+                                            {mounted ? new Date(order.createdAt).toLocaleDateString(language === 'fr' ? 'fr-CH' : 'en-CH') : ''}
                                         </span>
                                         <div className="flex -space-x-1.5">
                                             {order.items.slice(0, 5).map((item) => (
@@ -229,7 +231,7 @@ export default function DeliveryDashboard() {
                                             }}
                                             className="mt-2 text-xs bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center self-end active:scale-95"
                                         >
-                                            Complete delivery
+                                            {t.delivery.complete}
                                         </button>
                                     </div>
                                 </div>
@@ -241,7 +243,7 @@ export default function DeliveryDashboard() {
             {readyOrders.length === 0 && (
                 <div className="text-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-100">
                     <Truck className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-                    <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">No orders ready for delivery</p>
+                    <p className="text-gray-400 font-bold uppercase tracking-wider text-xs">{t.delivery.no_orders}</p>
                 </div>
             )}
 
@@ -252,12 +254,12 @@ export default function DeliveryDashboard() {
                             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                 <Truck className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-black tracking-tight mb-1">Final Delivery Check</h3>
-                            <p className="text-xs text-blue-100 font-medium">Order {completingOrder.id} for {completingOrder.client?.name}</p>
+                            <h3 className="text-xl font-black tracking-tight mb-1">{t.delivery.final_check}</h3>
+                            <p className="text-xs text-blue-100 font-medium">{t.delivery.final_check_desc(completingOrder.id, completingOrder.client?.name || t.common.error)}</p>
                         </div>
                         <div className="p-8 space-y-6">
                             <div className="bg-gray-50 rounded-2xl p-4">
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Receiver Signature</p>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{t.delivery.receiver_signature}</p>
                                 <SignaturePad onEnd={setSignature} />
                             </div>
 
@@ -269,14 +271,14 @@ export default function DeliveryDashboard() {
                                     }}
                                     className="flex-1 px-4 py-3 border border-gray-100 text-gray-500 rounded-2xl font-bold hover:bg-gray-50 transition-all"
                                 >
-                                    Cancel
+                                    {t.common.cancel}
                                 </button>
                                 <button
                                     onClick={handleCompleteDelivery}
                                     disabled={!signature || submitting}
                                     className="flex-[2] px-4 py-3 bg-blue-600 text-white rounded-2xl font-black shadow-xl shadow-blue-100 disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center active:scale-95"
                                 >
-                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Items Delivered'}
+                                    {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : t.delivery.confirm_delivered}
                                 </button>
                             </div>
                         </div>

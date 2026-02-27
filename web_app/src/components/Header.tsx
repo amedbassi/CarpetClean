@@ -4,6 +4,8 @@ import { Truck, ClipboardList, Hammer, LayoutDashboard, BarChart3, Settings, Dol
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/lib/LanguageContext';
+import { translations } from '@/lib/translations';
 
 interface SettingsData {
     priceWool: number;
@@ -22,6 +24,7 @@ interface SettingsData {
 }
 
 export default function Header() {
+    const { language, setLanguage, t } = useLanguage();
     const pathname = usePathname();
     const [showSettings, setShowSettings] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -101,15 +104,15 @@ export default function Header() {
     };
 
     const tabs = [
-        { name: 'Intake', href: '/', icon: ClipboardList },
-        { name: 'Operations', href: '/operations', icon: LayoutDashboard },
-        { name: 'Repair', href: '/repair', icon: Hammer },
-        { name: 'Delivery', href: '/delivery', icon: Truck },
-        { name: 'Data Insights', href: '/data', icon: BarChart3 },
+        { name: t.header.intake, href: '/', icon: ClipboardList },
+        { name: t.header.operations, href: '/operations', icon: LayoutDashboard },
+        { name: t.header.repair, href: '/repair', icon: Hammer },
+        { name: t.header.delivery, href: '/delivery', icon: Truck },
+        { name: t.header.insights, href: '/data', icon: BarChart3 },
     ];
 
     const formattedToday = mounted
-        ? new Intl.DateTimeFormat('en-CH', {
+        ? new Intl.DateTimeFormat(language === 'fr' ? 'fr-CH' : 'en-CH', {
             day: '2-digit',
             month: 'long',
             year: 'numeric',
@@ -130,7 +133,7 @@ export default function Header() {
                                 CarpetClean <span className="text-blue-600">Pro</span>
                             </h1>
                             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mt-1">
-                                Geneva Operations
+                                {t.common.geneva}
                             </p>
                         </div>
                     </div>
@@ -159,7 +162,7 @@ export default function Header() {
                     {/* Utility / Date */}
                     <div className="flex items-center space-x-4">
                         <div className="hidden lg:flex flex-col items-end border-r border-gray-200 pr-4 mr-2">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Switzerland</span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t.common.switzerland}</span>
                             <span className="text-xs font-semibold text-gray-600">{formattedToday}</span>
                         </div>
                         <div className="relative" ref={dropdownRef}>
@@ -173,7 +176,7 @@ export default function Header() {
                             {showSettings && (
                                 <div className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
                                     <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between">
-                                        <h3 className="text-white font-bold text-lg">Quick Settings</h3>
+                                        <h3 className="text-white font-bold text-lg">{t.header.settings}</h3>
                                         <button
                                             onClick={() => setShowSettings(false)}
                                             className="text-white/80 hover:text-white transition-colors"
@@ -185,9 +188,25 @@ export default function Header() {
                                     <div className="p-5 space-y-5 max-h-[70vh] overflow-y-auto">
                                         {/* Pricing Section */}
                                         <div className="space-y-3">
-                                            <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
-                                                <DollarSign className="w-4 h-4" />
-                                                Cleaning Prices (per m²)
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
+                                                    <DollarSign className="w-4 h-4" />
+                                                    {t.header.prices}
+                                                </div>
+                                                <div className="flex bg-gray-100 p-1 rounded-lg">
+                                                    <button
+                                                        onClick={() => setLanguage('en')}
+                                                        className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                                    >
+                                                        EN
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setLanguage('fr')}
+                                                        className={`px-3 py-1 rounded-md text-[10px] font-black transition-all ${language === 'fr' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400'}`}
+                                                    >
+                                                        FR
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-3">
@@ -284,7 +303,7 @@ export default function Header() {
 
                                             <div className="space-y-2 pt-2">
                                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    Repair (hourly)
+                                                    {t.header.hourly_rate}
                                                 </label>
                                                 <div className="relative">
                                                     <input
@@ -303,7 +322,7 @@ export default function Header() {
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Tax (%)
+                                                        {t.header.tax}
                                                     </label>
                                                     <input
                                                         type="number"
@@ -315,7 +334,7 @@ export default function Header() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Currency
+                                                        {t.header.currency}
                                                     </label>
                                                     <select
                                                         value={settings.currency}
@@ -336,7 +355,7 @@ export default function Header() {
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-gray-700 font-bold text-sm">
                                                 <Mail className="w-4 h-4" />
-                                                Email (SMTP)
+                                                {t.header.email_smtp}
                                             </div>
 
                                             <div className="space-y-2">
@@ -413,7 +432,7 @@ export default function Header() {
                                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
                                         >
                                             <Save className="w-4 h-4" />
-                                            Save Settings
+                                            {t.header.save_settings}
                                         </button>
                                     </div>
                                 </div>

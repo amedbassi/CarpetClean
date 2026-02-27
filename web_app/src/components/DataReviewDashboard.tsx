@@ -18,9 +18,11 @@ import {
     User
 } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
+import { useLanguage } from '@/lib/LanguageContext';
 import { Order, CarpetItem } from '@/lib/types';
 
 export default function DataReviewDashboard() {
+    const { t, language } = useLanguage();
     const { orders, loading } = useOrders();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -39,7 +41,7 @@ export default function DataReviewDashboard() {
         }, {} as Record<string, number>);
 
         const clientRevenue = orders.reduce((acc, order) => {
-            const name = order.client?.name || 'Unknown';
+            const name = order.client?.name || t.common.error;
             const value = order.items.reduce((sum, i) => sum + (i.cleaningCost || 0) + (i.repairCost || 0), 0);
             acc[name] = (acc[name] || 0) + value;
             return acc;
@@ -79,7 +81,7 @@ export default function DataReviewDashboard() {
     const uniqueClients = Array.from(new Set(orders.map(o => o.client?.name).filter(Boolean))) as string[];
 
     const exportToCSV = () => {
-        const headers = ['Client', 'Order ID', 'Rug #', 'Individual Client', 'Item Status', 'Approval', 'Dimensions', 'Material', 'State', 'Cleaning Cost', 'Repair Cost', 'Total'];
+        const headers = t.insights.csv_headers;
         const rows: string[][] = [];
 
         orders.forEach(order => {
@@ -87,7 +89,7 @@ export default function DataReviewDashboard() {
                 const cleaningCost = item.cleaningCost || 0;
                 const repairCost = item.repairCost || 0;
                 rows.push([
-                    order.client?.name || 'Unknown',
+                    order.client?.name || t.common.error,
                     order.id,
                     item.id,
                     item.individualClient || '',
@@ -118,7 +120,7 @@ export default function DataReviewDashboard() {
     const copyApprovalLink = (orderId: string) => {
         const url = `${window.location.origin}/approve/${orderId}`;
         navigator.clipboard.writeText(url);
-        alert('Approval link copied to clipboard!');
+        alert(t.insights.approval_link_copied);
     };
 
     const saveClientInfo = async () => {
@@ -137,18 +139,18 @@ export default function DataReviewDashboard() {
                 // Reload orders to get updated client info
                 window.location.reload();
             } else {
-                alert('Failed to update client information');
+                alert(t.insights.failed_to_update_client);
             }
         } catch (error) {
             console.error(error);
-            alert('Error updating client information');
+            alert(t.insights.error_updating_client);
         }
     };
 
-    if (loading) return <div className="p-20 text-center font-medium text-gray-400 animate-pulse">Generating insights...</div>;
+    if (loading) return <div className="p-20 text-center font-medium text-gray-400 animate-pulse">{t.common.loading}</div>;
 
     const clientGroups = filteredOrders.reduce((acc, order) => {
-        const clientName = order.client?.name || 'Unknown Client';
+        const clientName = order.client?.name || t.common.error;
         if (!acc[clientName]) acc[clientName] = [];
         acc[clientName].push(order);
         return acc;
@@ -158,15 +160,15 @@ export default function DataReviewDashboard() {
         <div className="max-w-7xl mx-auto p-6 space-y-8 page-transition">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Business Insights</h2>
-                    <p className="text-gray-500 text-sm mt-1 font-medium">Swiss Market Operations & Revenue Tracking</p>
+                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{t.insights.title}</h2>
+                    <p className="text-gray-500 text-sm mt-1 font-medium">{t.insights.subtitle}</p>
                 </div>
                 <button
                     onClick={exportToCSV}
                     className="flex items-center px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all font-bold text-sm"
                 >
                     <Download className="w-4 h-4 mr-2 text-blue-600" />
-                    Export Data (CSV)
+                    {t.insights.export_csv}
                 </button>
             </div>
 
@@ -176,10 +178,10 @@ export default function DataReviewDashboard() {
                     <div className="flex items-center justify-between">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
                             <BarChart3 className="w-4 h-4 text-blue-600" />
-                            Operations Pipeline
+                            {t.insights.pipeline}
                         </h3>
                         <div className="bg-blue-50 px-2.5 py-1 rounded text-[10px] font-black text-blue-700 uppercase">
-                            {analytics.totalItemsCount} Rugs Total
+                            {t.insights.rugs_total(analytics.totalItemsCount)}
                         </div>
                     </div>
 
@@ -212,7 +214,7 @@ export default function DataReviewDashboard() {
 
                 <div className="lg:col-span-3 bg-gray-900 text-white p-7 rounded-2xl shadow-xl flex flex-col relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-500/20 transition-colors"></div>
-                    <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 text-gray-500">Top Swiss Accounts</h3>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 text-gray-500">{t.insights.top_accounts}</h3>
                     <div className="flex-1 space-y-5 relative z-10">
                         {analytics.topClients.map(([name, revenue], idx) => (
                             <div key={name} className="flex items-center justify-between group/item">
@@ -224,12 +226,12 @@ export default function DataReviewDashboard() {
                             </div>
                         ))}
                         {analytics.topClients.length === 0 && (
-                            <div className="h-full flex items-center justify-center text-gray-600 text-xs font-bold uppercase tracking-widest">No Revenue Data</div>
+                            <div className="h-full flex items-center justify-center text-gray-600 text-xs font-bold uppercase tracking-widest">{t.insights.no_revenue}</div>
                         )}
                     </div>
                     <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
-                        <span>Currency</span>
-                        <span className="text-white">Swiss Franc (CHF)</span>
+                        <span>{t.insights.currency_label}</span>
+                        <span className="text-white">{t.insights.currency_value}</span>
                     </div>
                 </div>
             </div>
@@ -241,7 +243,7 @@ export default function DataReviewDashboard() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50/50 border-none rounded-lg focus:ring-2 focus:ring-blue-500/20"
-                            placeholder="Filter by Order ID or Client..."
+                            placeholder={t.insights.search_placeholder}
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
@@ -252,13 +254,13 @@ export default function DataReviewDashboard() {
                             onChange={e => setStatusFilter(e.target.value)}
                             className="text-xs font-bold bg-gray-50 border-none rounded-lg px-3 py-2 cursor-pointer focus:ring-2 focus:ring-blue-500/20"
                         >
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Waiting</option>
-                            <option value="measured">Measured</option>
-                            <option value="ready_for_delivery">Ready</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="pending_approval">Pending Approval</option>
-                            <option value="approved">Approved</option>
+                            <option value="all">{t.insights.all_statuses}</option>
+                            <option value="pending">{t.common.pending}</option>
+                            <option value="measured">{t.common.measured}</option>
+                            <option value="ready_for_delivery">{t.common.ready}</option>
+                            <option value="delivered">{t.common.delivered}</option>
+                            <option value="pending_approval">{t.common.pending_approval}</option>
+                            <option value="approved">{t.common.approved}</option>
                         </select>
                     </div>
                 </div>
@@ -270,11 +272,11 @@ export default function DataReviewDashboard() {
                                 <h3 className="text-lg font-black text-gray-900">{clientName}</h3>
                                 <div className="flex items-center gap-3 mt-1">
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                        {clientOrders.length} Order{clientOrders.length > 1 ? 's' : ''}
+                                        {t.insights.orders_count(clientOrders.length)}
                                     </span>
                                     <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                     <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
-                                        {clientOrders.reduce((sum, o) => sum + o.items.length, 0)} Items
+                                        {t.insights.items_count(clientOrders.reduce((sum, o) => sum + o.items.length, 0))}
                                     </span>
                                 </div>
                             </div>
@@ -302,10 +304,10 @@ export default function DataReviewDashboard() {
                                             <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded text-sm">{order.id}</span>
                                             {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
                                                 <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full border ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved')
-                                                        ? 'bg-green-50 text-green-700 border-green-100'
-                                                        : 'bg-orange-50 text-orange-700 border-orange-100'
+                                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                                    : 'bg-orange-50 text-orange-700 border-orange-100'
                                                     }`}>
-                                                    {order.cleaningApprovalStatus === 'approved' ? 'Approved' : 'Pending'}
+                                                    {order.cleaningApprovalStatus === 'approved' ? t.common.approved : t.common.pending}
                                                 </span>
                                             )}
                                         </div>
@@ -314,10 +316,10 @@ export default function DataReviewDashboard() {
                                         <table className="w-full text-sm">
                                             <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-wider">
                                                 <tr>
-                                                    <th className="px-4 py-3 text-left">Item</th>
-                                                    <th className="px-4 py-3 text-left">Status</th>
-                                                    <th className="px-4 py-3 text-right">Cleaning (CHF)</th>
-                                                    <th className="px-4 py-3 text-right">Repair (CHF)</th>
+                                                    <th className="px-4 py-3 text-left">{t.insights.table_item}</th>
+                                                    <th className="px-4 py-3 text-left">{t.insights.table_status}</th>
+                                                    <th className="px-4 py-3 text-right">{t.insights.table_cleaning}</th>
+                                                    <th className="px-4 py-3 text-right">{t.insights.table_repair}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-50">
@@ -334,11 +336,11 @@ export default function DataReviewDashboard() {
                                                                         </span>
                                                                     )}
                                                                 </div>
-                                                                <span className="text-[10px] text-gray-400 font-medium">{item.material || 'Carpet'} • {item.state}</span>
+                                                                <span className="text-[10px] text-gray-400 font-medium">{item.material || t.insights.carpet_default} • {item.state}</span>
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-3">
-                                                            <span className="text-[10px] font-black uppercase text-gray-500">{item.status.replace('_', ' ')}</span>
+                                                            <span className="text-[10px] font-black uppercase text-gray-500">{t.common[item.status as keyof typeof t.common] || item.status.replace('_', ' ')}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-right font-bold text-gray-900">{item.cleaningCost?.toFixed(2) || '0.00'}</td>
                                                         <td className="px-4 py-3 text-right font-bold text-orange-500">{item.repairCost?.toFixed(2) || '0.00'}</td>
@@ -358,98 +360,98 @@ export default function DataReviewDashboard() {
             {editingClient && clientForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setEditingClient(null)}>
                     <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-xl font-bold mb-4">Client Information</h3>
-                        
+                        <h3 className="text-xl font-bold mb-4">{t.repair.client_info}</h3>
+
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Name</label>
+                                <label className="block text-sm font-medium text-gray-700">{t.intake.client_name}</label>
                                 <input
                                     type="text"
                                     value={clientForm.name}
-                                    onChange={e => setClientForm({...clientForm, name: e.target.value})}
+                                    onChange={e => setClientForm({ ...clientForm, name: e.target.value })}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 />
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                                <label className="block text-sm font-medium text-gray-700">{t.intake.phone}</label>
                                 <input
                                     type="tel"
                                     value={clientForm.phone || ''}
-                                    onChange={e => setClientForm({...clientForm, phone: e.target.value})}
+                                    onChange={e => setClientForm({ ...clientForm, phone: e.target.value })}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 />
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <label className="block text-sm font-medium text-gray-700">{t.intake.email}</label>
                                 <input
                                     type="email"
                                     value={clientForm.email || ''}
-                                    onChange={e => setClientForm({...clientForm, email: e.target.value})}
+                                    onChange={e => setClientForm({ ...clientForm, email: e.target.value })}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 />
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Street</label>
+                                    <label className="block text-sm font-medium text-gray-700">{t.intake.street}</label>
                                     <input
                                         type="text"
                                         value={clientForm.street || ''}
-                                        onChange={e => setClientForm({...clientForm, street: e.target.value})}
+                                        onChange={e => setClientForm({ ...clientForm, street: e.target.value })}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Number</label>
+                                    <label className="block text-sm font-medium text-gray-700">{t.intake.number}</label>
                                     <input
                                         type="text"
                                         value={clientForm.number || ''}
-                                        onChange={e => setClientForm({...clientForm, number: e.target.value})}
+                                        onChange={e => setClientForm({ ...clientForm, number: e.target.value })}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                     />
                                 </div>
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                                    <label className="block text-sm font-medium text-gray-700">{t.intake.postal_code}</label>
                                     <input
                                         type="text"
                                         value={clientForm.postalCode || ''}
-                                        onChange={e => setClientForm({...clientForm, postalCode: e.target.value})}
+                                        onChange={e => setClientForm({ ...clientForm, postalCode: e.target.value })}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">City</label>
+                                    <label className="block text-sm font-medium text-gray-700">{t.intake.city}</label>
                                     <input
                                         type="text"
                                         value={clientForm.city || ''}
-                                        onChange={e => setClientForm({...clientForm, city: e.target.value})}
+                                        onChange={e => setClientForm({ ...clientForm, city: e.target.value })}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                     />
                                 </div>
                             </div>
-                            
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Country</label>
+                                <label className="block text-sm font-medium text-gray-700">{t.intake.country}</label>
                                 <input
                                     type="text"
                                     value={clientForm.country || ''}
-                                    onChange={e => setClientForm({...clientForm, country: e.target.value})}
+                                    onChange={e => setClientForm({ ...clientForm, country: e.target.value })}
                                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="flex space-x-3 mt-6">
                             <button
                                 onClick={saveClientInfo}
                                 className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
                             >
-                                Save Changes
+                                {t.repair.save_changes}
                             </button>
                             <button
                                 onClick={() => {
@@ -458,7 +460,7 @@ export default function DataReviewDashboard() {
                                 }}
                                 className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
                             >
-                                Cancel
+                                {t.common.cancel}
                             </button>
                         </div>
                     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Plus, CheckCircle, Receipt, Trash2, Search, ScanLine, User, X, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 import SignaturePad from './SignaturePad';
 
 interface CarpetItem {
@@ -48,6 +49,7 @@ function buildAssignments(receipts: ScannedReceipt[]): string[] {
 }
 
 export default function DeliveryForm() {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         id: '',
         clientId: '',
@@ -272,10 +274,10 @@ export default function DeliveryForm() {
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center space-y-4">
                 <CheckCircle className="h-16 w-16 text-green-500" />
-                <h2 className="text-2xl font-bold text-gray-800">Order Received!</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{t.intake.order_received}</h2>
                 <p className="text-xl font-mono text-blue-600 bg-blue-50 px-3 py-1 rounded">{formData.id}</p>
                 <div className="text-left w-full max-w-xs bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Items to Label:</h3>
+                    <h3 className="font-semibold mb-2">{t.intake.items_to_label}:</h3>
                     <ul className="space-y-1">
                         {formData.items.map(item => (
                             <li key={item.id} className="flex items-center gap-2 text-sm">
@@ -310,7 +312,7 @@ export default function DeliveryForm() {
                     }}
                     className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
                 >
-                    Add New Order
+                    {t.intake.add_new_order}
                 </button>
             </div>
         );
@@ -322,26 +324,26 @@ export default function DeliveryForm() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto p-4 bg-white rounded-xl shadow-lg">
             <div className="flex justify-between items-center border-b pb-4">
-                <h2 className="text-xl font-semibold text-gray-800">New Order</h2>
+                <h2 className="text-xl font-semibold text-gray-800">{t.intake.new_order}</h2>
                 <span className="font-mono text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                    {formData.id || 'Loading...'}
+                    {formData.id || t.common.loading_id}
                 </span>
             </div>
 
             {/* Client Details */}
             <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-700">
-                    Client Details
+                    {t.intake.client_details}
                     {isPartnerOrder && (
                         <span className="ml-2 text-xs font-normal bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                            Partner / Pressing
+                            {t.common.partner_pressing}
                         </span>
                     )}
                 </h3>
 
                 <div className="relative" ref={dropdownRef}>
                     <label htmlFor="clientName" className="block text-sm font-medium text-gray-700">
-                        Client Name {!isNewClient && <span className="text-green-600 text-xs">(Existing)</span>}
+                        {t.intake.client_name} {!isNewClient && <span className="text-green-600 text-xs">({t.common.existing})</span>}
                     </label>
                     <div className="relative">
                         <input
@@ -355,7 +357,7 @@ export default function DeliveryForm() {
                                 if (formData.clientName && filteredClients.length > 0) setShowDropdown(true);
                             }}
                             className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Partner number or name (e.g. 721)"
+                            placeholder={t.intake.placeholder_name}
                             autoComplete="off"
                         />
                         <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 mt-0.5" />
@@ -385,54 +387,54 @@ export default function DeliveryForm() {
                 </div>
 
                 <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">{t.intake.phone}</label>
                     <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="+41 79 123 4567 (Optional)" />
+                        placeholder={t.intake.placeholder_phone} />
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">{t.intake.email}</label>
                     <input type="email" id="email" name="email" value={formData.email} onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="client@example.com (Optional)" />
+                        placeholder={t.intake.placeholder_email} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label htmlFor="street" className="block text-sm font-medium text-gray-700">Street</label>
+                        <label htmlFor="street" className="block text-sm font-medium text-gray-700">{t.intake.street}</label>
                         <input type="text" id="street" name="street" value={formData.street} onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Main Street" />
+                            placeholder={t.intake.placeholder_street} />
                     </div>
                     <div>
-                        <label htmlFor="number" className="block text-sm font-medium text-gray-700">Number</label>
+                        <label htmlFor="number" className="block text-sm font-medium text-gray-700">{t.intake.number}</label>
                         <input type="text" id="number" name="number" value={formData.number} onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="123" />
+                            placeholder={t.intake.placeholder_number} />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">Postal Code</label>
+                        <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">{t.intake.postal_code}</label>
                         <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="8000" />
+                            placeholder={t.intake.placeholder_postal} />
                     </div>
                     <div>
-                        <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+                        <label htmlFor="city" className="block text-sm font-medium text-gray-700">{t.intake.city}</label>
                         <input type="text" id="city" name="city" value={formData.city} onChange={handleChange}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Zürich" />
+                            placeholder={t.intake.placeholder_city} />
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">{t.intake.country}</label>
                     <input type="text" id="country" name="country" value={formData.country} onChange={handleChange}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Switzerland" />
+                        placeholder={t.intake.placeholder_country} />
                 </div>
             </div>
 
@@ -441,14 +443,14 @@ export default function DeliveryForm() {
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium text-gray-700 flex items-center gap-2">
                         <ScanLine className="w-5 h-5 text-blue-500" />
-                        Receipts
-                        <span className="text-xs font-normal text-gray-400">(optional – for partner orders)</span>
+                        {t.intake.receipts}
+                        <span className="text-xs font-normal text-gray-400">{t.intake.optional_partner}</span>
                     </h3>
                     <label
                         htmlFor="receipt-add"
                         className="cursor-pointer flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium"
                     >
-                        <Plus className="h-4 w-4" /> Scan Receipt
+                        <Plus className="h-4 w-4" /> {t.intake.scan_receipt}
                         <input
                             id="receipt-add"
                             type="file"
@@ -461,7 +463,7 @@ export default function DeliveryForm() {
                 </div>
 
                 {scannedReceipts.length === 0 && (
-                    <p className="text-sm text-gray-400 italic">No receipts scanned — tap &quot;+ Scan Receipt&quot; if this is a partner order.</p>
+                    <p className="text-sm text-gray-400 italic">{t.intake.no_receipts_desc}</p>
                 )}
 
                 {scannedReceipts.map((r, idx) => (
@@ -479,12 +481,12 @@ export default function DeliveryForm() {
                         {r.scanning && (
                             <div className="flex items-center gap-2 text-blue-600 text-sm">
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Scanning receipt...
+                                {t.common.scan_receipt_loading}
                             </div>
                         )}
 
                         {r.error && (
-                            <p className="text-sm text-red-500">⚠ OCR failed: {r.error}</p>
+                            <p className="text-sm text-red-500">⚠ {t.common.ocr_failed}: {r.error}</p>
                         )}
 
                         {!r.scanning && !r.error && r.entries.length > 0 && (
@@ -495,22 +497,22 @@ export default function DeliveryForm() {
                                             <User className="w-3.5 h-3.5 text-blue-400" />
                                             {entry.name}
                                         </span>
-                                        <span className="text-gray-500 text-xs">{entry.rugCount} rug{entry.rugCount !== 1 ? 's' : ''}</span>
+                                        <span className="text-gray-500 text-xs">{entry.rugCount} {entry.rugCount !== 1 ? t.common.rugs : t.common.rug}</span>
                                     </div>
                                 ))}
                             </div>
                         )}
 
                         {!r.scanning && !r.error && r.entries.length === 0 && r.rawText && (
-                            <p className="text-xs text-amber-600">⚠ Scanned but no client names detected. Raw text: <span className="italic">{r.rawText.slice(0, 120)}…</span></p>
+                            <p className="text-xs text-amber-600">⚠ {t.common.no_clients_detected}. Raw text: <span className="italic">{r.rawText.slice(0, 120)}…</span></p>
                         )}
                     </div>
                 ))}
 
                 {totalOcrRugs > 0 && (
                     <p className="text-xs text-blue-600">
-                        ✓ {totalOcrRugs} rug{totalOcrRugs !== 1 ? 's' : ''} assigned from receipt{scannedReceipts.length > 1 ? 's' : ''}.
-                        {formData.items.length > totalOcrRugs && ` ${formData.items.length - totalOcrRugs} additional rug(s) without individual client.`}
+                        ✓ {totalOcrRugs} {totalOcrRugs !== 1 ? t.common.rugs : t.common.rug} {t.common.assigned_from} {t.common.receipt}{scannedReceipts.length > 1 ? 's' : ''}.
+                        {formData.items.length > totalOcrRugs && ` ${formData.items.length - totalOcrRugs} ${t.common.additional_rugs}.`}
                     </p>
                 )}
             </div>
@@ -518,9 +520,9 @@ export default function DeliveryForm() {
             {/* Items Received */}
             <div className="space-y-4 border-t pt-4">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-700">Items Received</h3>
+                    <h3 className="text-lg font-medium text-gray-700">{t.intake.items_received}</h3>
                     <button type="button" onClick={addItem} className="flex items-center text-sm text-blue-600 hover:text-blue-800">
-                        <Plus className="h-4 w-4 mr-1" /> Add Rug
+                        <Plus className="h-4 w-4 mr-1" /> {t.intake.add_rug}
                     </button>
                 </div>
 
@@ -562,7 +564,7 @@ export default function DeliveryForm() {
                 disabled={!formData.signature || !formData.id}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-                Submit Order
+                {t.intake.submit_order}
             </button>
             {error && <p className="text-red-500 text-center text-sm mt-2 font-bold">{error}</p>}
         </form>

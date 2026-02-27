@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Save, ArrowLeft, Hammer } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface RepairEstimateFormProps {
     orderId: string;
@@ -11,7 +12,9 @@ interface RepairEstimateFormProps {
 }
 
 export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFormProps) {
+    const { t } = useLanguage();
     const router = useRouter();
+
     const [formData, setFormData] = useState({
         repairDescription: '',
         repairCost: '',
@@ -73,11 +76,11 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 console.warn('Failed to reset approval status, but estimate was saved');
             }
 
-            alert('Repair estimate saved! You can now send it to the client.');
+            alert(t.repair_estimate.success_msg);
             router.push('/repair');
         } catch (error) {
             console.error(error);
-            alert('Error saving estimate');
+            alert(t.repair_estimate.error_save);
         }
     };
 
@@ -90,7 +93,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                     <ArrowLeft className="w-6 h-6" />
                 </Link>
                 <div>
-                    <h2 className="text-xl font-bold text-gray-800">Repair Estimate</h2>
+                    <h2 className="text-xl font-bold text-gray-800">{t.repair_estimate.title}</h2>
                     <p className="text-sm font-mono text-gray-500">{itemId}</p>
                 </div>
             </div>
@@ -101,20 +104,20 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 </div>
 
                 <div>
-                    <label htmlFor="repair-description" className="block text-sm font-medium text-gray-700">Repair Description</label>
+                    <label htmlFor="repair-description" className="block text-sm font-medium text-gray-700">{t.repair_estimate.description_label}</label>
                     <textarea
                         id="repair-description"
                         required
                         rows={4}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 text-sm"
-                        placeholder="Describe the damage and required repairs..."
+                        placeholder={t.repair_estimate.description_placeholder}
                         value={formData.repairDescription}
                         onChange={e => setFormData(prev => ({ ...prev, repairDescription: e.target.value }))}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="repair-cost" className="block text-sm font-medium text-gray-700">Estimated Repair Cost (CHF)</label>
+                    <label htmlFor="repair-cost" className="block text-sm font-medium text-gray-700">{t.repair_estimate.cost_label}</label>
                     <div className="mt-1 relative rounded-md shadow-sm">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span className="text-gray-500 text-sm">CHF</span>
@@ -131,7 +134,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                         />
                     </div>
                     <p className="text-[10px] text-gray-500 mt-1">
-                        Typical Swiss rates: Fringe repair (150-300 CHF), Edge binding (120-250 CHF).
+                        {t.repair_estimate.rates_info}
                     </p>
                 </div>
 
@@ -141,10 +144,10 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-orange-600 hover:bg-orange-700 focus:outline-none transition-all active:scale-[0.98]"
                     >
                         <Save className="w-5 h-5 mr-2" />
-                        Save & Set Estimated
+                        {t.repair_estimate.save_button}
                     </button>
                     <p className="text-[10px] text-center text-gray-400 mt-3 italic">
-                        Once saved, this estimate will be included in the client&apos;s approval link.
+                        {t.repair_estimate.save_info}
                     </p>
                 </div>
             </form>

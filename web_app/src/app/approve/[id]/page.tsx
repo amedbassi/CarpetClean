@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle, AlertCircle, ShieldCheck, Ruler, Hammer } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface CarpetItem {
     id: string;
@@ -27,6 +28,7 @@ interface Order {
 }
 
 export default function ClientApprovalPage() {
+    const { t } = useLanguage();
     const { id } = useParams();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
@@ -61,17 +63,17 @@ export default function ClientApprovalPage() {
 
             if (response.ok) {
                 setSubmitted(true);
-                setOrder(prev => prev ? { 
-                    ...prev, 
+                setOrder(prev => prev ? {
+                    ...prev,
                     cleaningApprovalStatus: status,
-                    repairApprovalStatus: status 
+                    repairApprovalStatus: status
                 } : null);
             } else {
-                alert('Submission failed. Please try again.');
+                alert(t.approval.submission_failed);
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred.');
+            alert(t.approval.error_msg);
         } finally {
             setSubmitting(false);
         }
@@ -81,7 +83,7 @@ export default function ClientApprovalPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading your estimate...</p>
+                <p className="text-gray-600">{t.approval.loading}</p>
             </div>
         </div>
     );
@@ -90,8 +92,8 @@ export default function ClientApprovalPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-red-100 max-w-md w-full text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-gray-800">Estimate Not Found</h2>
-                <p className="text-gray-600 mt-2">We couldn&apos;t find the estimate you&apos;re looking for. Please contact our support team.</p>
+                <h2 className="text-xl font-bold text-gray-800">{t.approval.not_found_title}</h2>
+                <p className="text-gray-600 mt-2">{t.approval.not_found_desc}</p>
             </div>
         </div>
     );
@@ -100,10 +102,10 @@ export default function ClientApprovalPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-green-100 max-w-md w-full text-center">
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-gray-800">Estimate Approved!</h2>
-                <p className="text-gray-600 mt-2">Thank you, {order.client.name}. We&apos;ve received your approval and will proceed with the work immediately.</p>
+                <h2 className="text-xl font-bold text-gray-800">{t.approval.approved_title}</h2>
+                <p className="text-gray-600 mt-2">{t.approval.approved_desc(order.client.name)}</p>
                 <div className="mt-8 pt-6 border-t">
-                    <p className="text-sm text-gray-500">A confirmation has been sent to our operations team.</p>
+                    <p className="text-sm text-gray-500">{t.approval.confirmation_sent}</p>
                 </div>
             </div>
         </div>
@@ -118,34 +120,34 @@ export default function ClientApprovalPage() {
             {/* Header */}
             <div className="bg-blue-600 text-white py-8 px-4 text-center shadow-md">
                 <ShieldCheck className="w-12 h-12 mx-auto mb-3 opacity-90" />
-                <h1 className="text-2xl font-bold">Work Estimate & Approval</h1>
-                <p className="text-blue-100 mt-1 opacity-90">Order ID: {order.id}</p>
+                <h1 className="text-2xl font-bold">{t.approval.header_title}</h1>
+                <p className="text-blue-100 mt-1 opacity-90">{t.approval.order_id}: {order.id}</p>
             </div>
 
             <div className="max-w-xl mx-auto -mt-4 px-4">
                 <div className="bg-white rounded-xl shadow-lg border p-6 mb-6">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Client Details</h2>
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">{t.approval.client_details}</h2>
                     <p className="text-gray-700 font-medium">{order.client.name}</p>
-                    <p className="text-sm text-gray-500">We have completed the inspection of your rugs and generated the following estimate for your approval.</p>
+                    <p className="text-sm text-gray-500">{t.approval.inspection_intro}</p>
                 </div>
 
                 <div className="space-y-4 mb-8">
                     <h2 className="text-lg font-bold text-gray-800 flex items-center px-1">
                         <Package className="w-5 h-5 mr-2 text-blue-600" />
-                        Rug Inspection Summary
+                        {t.approval.summary_title}
                     </h2>
 
                     {order.items.map((item, idx) => (
                         <div key={item.id} className="bg-white rounded-xl border shadow-sm overflow-hidden">
                             <div className="bg-gray-50 px-4 py-2 border-b flex justify-between items-center">
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Rug #{idx + 1}</span>
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t.approval.rug_number(idx + 1)}</span>
                                 <span className="font-mono text-xs text-gray-400">{item.id}</span>
                             </div>
                             <div className="p-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div className="flex items-center text-gray-600">
                                         <Ruler className="w-4 h-4 mr-2 opacity-70" />
-                                        <span>{item.length} x {item.width} ft</span>
+                                        <span>{item.length} x {item.width} {t.approval.unit}</span>
                                     </div>
                                     <div className="text-gray-600 text-right">
                                         <span className="font-medium">{item.material}</span>
@@ -154,8 +156,8 @@ export default function ClientApprovalPage() {
 
                                 <div className="space-y-2 pt-2">
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">Cleaning Service</span>
-                                        <span className="font-semibold text-gray-800">${(item.cleaningCost || 0).toFixed(2)}</span>
+                                        <span className="text-gray-600">{t.approval.cleaning_service}</span>
+                                        <span className="font-semibold text-gray-800">CHF {(item.cleaningCost || 0).toFixed(2)}</span>
                                     </div>
 
                                     {item.repairCost && item.repairCost > 0 && (
@@ -163,9 +165,9 @@ export default function ClientApprovalPage() {
                                             <div className="flex justify-between items-center text-sm mb-1">
                                                 <span className="flex items-center font-medium text-orange-800">
                                                     <Hammer className="w-3.5 h-3.5 mr-1.5" />
-                                                    Repair Service
+                                                    {t.approval.repair_service}
                                                 </span>
-                                                <span className="font-bold text-orange-900">${item.repairCost.toFixed(2)}</span>
+                                                <span className="font-bold text-orange-900">CHF {item.repairCost.toFixed(2)}</span>
                                             </div>
                                             <p className="text-[11px] text-orange-700 italic leading-relaxed">
                                                 {item.repairDescription}
@@ -180,19 +182,19 @@ export default function ClientApprovalPage() {
 
                 {/* Totals Section */}
                 <div className="bg-white rounded-xl shadow-lg border p-6 mb-8">
-                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Order Total</h2>
+                    <h2 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">{t.approval.order_total}</h2>
                     <div className="space-y-3">
                         <div className="flex justify-between text-gray-600">
-                            <span>Total Cleaning</span>
-                            <span>${cleaningTotal.toFixed(2)}</span>
+                            <span>{t.approval.total_cleaning}</span>
+                            <span>CHF {cleaningTotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600">
-                            <span>Total Repairs</span>
-                            <span>${repairTotal.toFixed(2)}</span>
+                            <span>{t.approval.total_repairs}</span>
+                            <span>CHF {repairTotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between border-t pt-3 text-xl font-black text-blue-700">
-                            <span>Grand Total</span>
-                            <span>${grandTotal.toFixed(2)}</span>
+                            <span>{t.approval.grand_total}</span>
+                            <span>CHF {grandTotal.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -204,10 +206,10 @@ export default function ClientApprovalPage() {
                         disabled={submitting}
                         className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 active:scale-[0.98] transition flex items-center justify-center disabled:opacity-50"
                     >
-                        {submitting ? 'Submitting...' : (
+                        {submitting ? t.approval.submitting : (
                             <>
                                 <CheckCircle className="w-6 h-6 mr-2" />
-                                Approve Estimate
+                                {t.approval.approve_button}
                             </>
                         )}
                     </button>
@@ -216,10 +218,10 @@ export default function ClientApprovalPage() {
                         disabled={submitting}
                         className="w-full bg-white text-gray-500 py-3 rounded-xl font-medium text-sm hover:bg-gray-50 transition"
                     >
-                        Reject & Contact Support
+                        {t.approval.reject_button}
                     </button>
                     <p className="text-[10px] text-center text-gray-400 mt-2 px-4 italic leading-relaxed">
-                        By approving, you authorize our team to proceed with the services listed above according to our terms and conditions.
+                        {t.approval.terms}
                     </p>
                 </div>
             </div>

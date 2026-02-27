@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Camera, Save, ArrowLeft, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface RugDetailFormProps {
     orderId: string;
@@ -19,6 +20,7 @@ interface RugDetailFormProps {
 }
 
 export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
+    const { t } = useLanguage();
     const router = useRouter();
     const [formData, setFormData] = useState({
         length: '',
@@ -83,7 +85,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                 }
             } catch (err) {
                 console.error(err);
-                setError('Failed to load rug details');
+                setError(t.rug_details.loading_error);
             } finally {
                 setLoading(false);
             }
@@ -125,14 +127,14 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
             });
 
             if (response.ok) {
-                alert('Item details saved!');
+                alert(t.rug_details.item_saved);
                 router.push('/operations');
             } else {
-                alert('Failed to save details');
+                alert(t.rug_details.failed_save);
             }
         } catch (error) {
             console.error(error);
-            alert('Error saving details');
+            alert(t.rug_details.error_save);
         }
     };
 
@@ -149,7 +151,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                     <ArrowLeft className="w-6 h-6" />
                 </Link>
                 <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-800">Rug Details</h2>
+                    <h2 className="text-xl font-bold text-gray-800">{t.rug_details.title}</h2>
                     <p className="text-sm font-mono text-gray-500">{itemId}</p>
                     {individualClient && (
                         <span className="inline-flex items-center gap-1 mt-1 text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
@@ -162,7 +164,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
 
             {loading ? (
                 <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
-                    <p className="text-gray-500">Loading rug details...</p>
+                    <p className="text-gray-500">{t.rug_details.loading}</p>
                 </div>
             ) : error ? (
                 <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
@@ -171,7 +173,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         onClick={() => window.location.reload()}
                         className="mt-4 text-blue-600 font-medium"
                     >
-                        Try Again
+                        {t.common.retry}
                     </button>
                 </div>
             ) : (
@@ -179,18 +181,18 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
 
                     {/* Photo Section */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pre-cleaning Photo</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t.rug_details.photo}</label>
                         <div className="flex items-center justify-center w-full">
                             <label htmlFor="photo-upload" className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
                                 {formData.photo || existingPhoto ? (
                                     <div className="text-center">
                                         <p className="text-green-600 font-medium">{formData.photo ? formData.photo.name : existingPhoto}</p>
-                                        <p className="text-xs text-gray-500 mt-1">Tap to change</p>
+                                        <p className="text-xs text-gray-500 mt-1">{t.rug_details.change_photo}</p>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Camera className="w-10 h-10 mb-2 text-gray-400" />
-                                        <p className="text-sm text-gray-500"><span className="font-semibold">Tap to take photo</span></p>
+                                        <p className="text-sm text-gray-500"><span className="font-semibold">{t.rug_details.take_photo}</span></p>
                                     </div>
                                 )}
                                 <input
@@ -208,7 +210,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                     {/* Dimensions */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label htmlFor="rug-length" className="block text-sm font-medium text-gray-700">Length (m)</label>
+                            <label htmlFor="rug-length" className="block text-sm font-medium text-gray-700">{t.rug_details.length}</label>
                             <input
                                 id="rug-length"
                                 type="number"
@@ -220,7 +222,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                             />
                         </div>
                         <div>
-                            <label htmlFor="rug-width" className="block text-sm font-medium text-gray-700">Width (m)</label>
+                            <label htmlFor="rug-width" className="block text-sm font-medium text-gray-700">{t.rug_details.width}</label>
                             <input
                                 id="rug-width"
                                 type="number"
@@ -235,34 +237,34 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
 
                     {/* Dropdowns */}
                     <div>
-                        <label htmlFor="rug-state" className="block text-sm font-medium text-gray-700">State / Condition</label>
+                        <label htmlFor="rug-state" className="block text-sm font-medium text-gray-700">{t.rug_details.state}</label>
                         <select
                             id="rug-state"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.state}
                             onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
                         >
-                            <option value="Good">Good</option>
-                            <option value="Stained">Stained</option>
-                            <option value="Worn">Worn</option>
-                            <option value="Damaged">Damaged</option>
-                            <option value="Heavily Soiled">Heavily Soiled</option>
+                            <option value="Good">{t.rug_details.states.good}</option>
+                            <option value="Stained">{t.rug_details.states.stained}</option>
+                            <option value="Worn">{t.rug_details.states.worn}</option>
+                            <option value="Damaged">{t.rug_details.states.damaged}</option>
+                            <option value="Heavily Soiled">{t.rug_details.states.soiled}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label htmlFor="rug-material" className="block text-sm font-medium text-gray-700">Material / Type</label>
+                        <label htmlFor="rug-material" className="block text-sm font-medium text-gray-700">{t.rug_details.material}</label>
                         <select
                             id="rug-material"
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.material}
                             onChange={e => setFormData(prev => ({ ...prev, material: e.target.value }))}
                         >
-                            <option value="Wool">Wool</option>
-                            <option value="Silk">Silk</option>
-                            <option value="Cotton">Cotton</option>
-                            <option value="Synthetic">Synthetic</option>
-                            <option value="Other">Other</option>
+                            <option value="Wool">{t.rug_details.materials.wool}</option>
+                            <option value="Silk">{t.rug_details.materials.silk}</option>
+                            <option value="Cotton">{t.rug_details.materials.cotton}</option>
+                            <option value="Synthetic">{t.rug_details.materials.synthetic}</option>
+                            <option value="Other">{t.rug_details.materials.other}</option>
                         </select>
                     </div>
 
@@ -271,7 +273,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                     >
                         <Save className="w-5 h-5 mr-2" />
-                        Save Details
+                        {t.rug_details.save_details}
                     </button>
                 </form>
             )}

@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Internal delivery management system",
 };
 
+import { LanguageProvider } from "@/lib/LanguageContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-b from-slate-50 via-gray-50 to-slate-100 text-slate-900`}
       >
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
