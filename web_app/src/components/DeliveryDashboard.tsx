@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Truck, MapPin, CheckCircle, Navigation, Sparkles, Loader2, User } from 'lucide-react';
 import SignaturePad from './SignaturePad';
 import { useOrders } from '@/hooks/useOrders';
@@ -13,6 +13,7 @@ export default function DeliveryDashboard() {
     const [completingOrder, setCompletingOrder] = useState<any>(null);
     const [signature, setSignature] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     const toggleSelection = (id: string) => {
         setSelectedIds(prev =>
@@ -25,7 +26,7 @@ export default function DeliveryDashboard() {
 
         // Check if all selected orders have client addresses
         const selectedOrders = readyOrders.filter(order => selectedIds.includes(order.id));
-        const ordersWithoutAddress = selectedOrders.filter(order => 
+        const ordersWithoutAddress = selectedOrders.filter(order =>
             !order.client?.postalCode || !order.client?.city || !order.client?.street
         );
 
@@ -47,7 +48,7 @@ export default function DeliveryDashboard() {
 
             const data = await response.json();
             setOptimizedSequence(data.optimizedRoute);
-            
+
             // Show success message with stats
             if (data.stats) {
                 alert(`Route optimized! 🎯\n\nStops: ${data.stats.totalStops}\nTime saved: ${data.stats.estimatedTimeSaved}\nEfficiency: ${data.stats.routeEfficiency} better`);
@@ -59,6 +60,10 @@ export default function DeliveryDashboard() {
             setOptimizing(false);
         }
     };
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleCompleteDelivery = async () => {
         if (!completingOrder || !signature) return;
@@ -98,8 +103,8 @@ export default function DeliveryDashboard() {
     );
 
     // Only orders where ALL items are ready for delivery (not delivered yet)
-    const readyOrders = orders.filter(o => 
-        o.items.length > 0 && 
+    const readyOrders = orders.filter(o =>
+        o.items.length > 0 &&
         o.items.every(i => i.status === 'ready_for_delivery') &&
         !o.items.every(i => i.status === 'delivered')
     );
@@ -157,78 +162,78 @@ export default function DeliveryDashboard() {
                     .map((order, index) => {
                         const isOptimized = optimizedSequence && optimizedSequence.includes(order.id);
                         const sequenceNumber = isOptimized ? optimizedSequence.indexOf(order.id) + 1 : null;
-                        
-                        return (
-                    <div
-                        key={order.id}
-                        onClick={() => toggleSelection(order.id)}
-                        className={`group cursor-pointer bg-white rounded-2xl border-2 transition-all overflow-hidden ${selectedIds.includes(order.id)
-                            ? 'border-blue-500 ring-4 ring-blue-500/10'
-                            : 'border-white hover:border-blue-100 shadow-sm'
-                            }`}
-                    >
-                        <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex items-start space-x-4">
-                                {sequenceNumber && (
-                                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
-                                        {sequenceNumber}
-                                    </div>
-                                )}
-                                <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-colors ${selectedIds.includes(order.id)
-                                    ? 'bg-blue-600 border-blue-600'
-                                    : 'bg-white border-gray-200 group-hover:border-blue-400'
-                                    } flex items-center justify-center`}>
-                                    {selectedIds.includes(order.id) && <CheckCircle className="w-4 h-4 text-white" />}
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center space-x-3">
-                                        <span className="font-mono font-bold text-gray-900 bg-gray-50 px-1.5 py-0.5 rounded text-sm">{order.id}</span>
-                                        <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                                            {order.items.length} items
-                                        </span>
-                                    </div>
-                                    <p className="font-bold text-gray-800">{order.client?.name || 'Unknown Client'}</p>
-                                    <div className="flex items-center text-xs text-gray-400 font-medium">
-                                        <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
-                                        {order.client?.street && order.client?.number
-                                            ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
-                                            : "No address provided"}
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="flex md:flex-col items-center md:items-end justify-between gap-2">
-                                <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                                    {new Date(order.createdAt).toLocaleDateString('en-CH')}
-                                </span>
-                                <div className="flex -space-x-1.5">
-                                    {order.items.slice(0, 5).map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className={`w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black shadow-sm ${item.status === 'delivered' ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'
-                                                }`}
+                        return (
+                            <div
+                                key={order.id}
+                                onClick={() => toggleSelection(order.id)}
+                                className={`group cursor-pointer bg-white rounded-2xl border-2 transition-all overflow-hidden ${selectedIds.includes(order.id)
+                                    ? 'border-blue-500 ring-4 ring-blue-500/10'
+                                    : 'border-white hover:border-blue-100 shadow-sm'
+                                    }`}
+                            >
+                                <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex items-start space-x-4">
+                                        {sequenceNumber && (
+                                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
+                                                {sequenceNumber}
+                                            </div>
+                                        )}
+                                        <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full border-2 transition-colors ${selectedIds.includes(order.id)
+                                            ? 'bg-blue-600 border-blue-600'
+                                            : 'bg-white border-gray-200 group-hover:border-blue-400'
+                                            } flex items-center justify-center`}>
+                                            {selectedIds.includes(order.id) && <CheckCircle className="w-4 h-4 text-white" />}
+                                        </div>
+                                        <div className="space-y-1">
+                                            <div className="flex items-center space-x-3">
+                                                <span className="font-mono font-bold text-gray-900 bg-gray-50 px-1.5 py-0.5 rounded text-sm">{order.id}</span>
+                                                <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                                    {order.items.length} items
+                                                </span>
+                                            </div>
+                                            <p className="font-bold text-gray-800">{order.client?.name || 'Unknown Client'}</p>
+                                            <div className="flex items-center text-xs text-gray-400 font-medium">
+                                                <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
+                                                {order.client?.street && order.client?.number
+                                                    ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
+                                                    : "No address provided"}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex md:flex-col items-center md:items-end justify-between gap-2">
+                                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                                            {mounted ? new Date(order.createdAt).toLocaleDateString('en-CH') : ''}
+                                        </span>
+                                        <div className="flex -space-x-1.5">
+                                            {order.items.slice(0, 5).map((item) => (
+                                                <div
+                                                    key={item.id}
+                                                    className={`w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black shadow-sm ${item.status === 'delivered' ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'
+                                                        }`}
+                                                >
+                                                    {item.id.split('-').pop()}
+                                                </div>
+                                            ))}
+                                            {order.items.length > 5 && (
+                                                <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[9px] font-black text-gray-400 shadow-sm">
+                                                    +{order.items.length - 5}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCompletingOrder(order);
+                                            }}
+                                            className="mt-2 text-xs bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center self-end active:scale-95"
                                         >
-                                            {item.id.split('-').pop()}
-                                        </div>
-                                    ))}
-                                    {order.items.length > 5 && (
-                                        <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[9px] font-black text-gray-400 shadow-sm">
-                                            +{order.items.length - 5}
-                                        </div>
-                                    )}
+                                            Complete delivery
+                                        </button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setCompletingOrder(order);
-                                    }}
-                                    className="mt-2 text-xs bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center self-end active:scale-95"
-                                >
-                                    Complete delivery
-                                </button>
                             </div>
-                        </div>
-                    </div>
                         );
                     })}
             </div>

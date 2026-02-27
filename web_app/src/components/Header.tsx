@@ -24,6 +24,7 @@ interface SettingsData {
 export default function Header() {
     const pathname = usePathname();
     const [showSettings, setShowSettings] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const [settings, setSettings] = useState<SettingsData>({
         priceWool: 27.0,
         priceSilk: 47.0,
@@ -40,6 +41,10 @@ export default function Header() {
         emailPassword: '',
     });
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (showSettings) {
@@ -103,11 +108,13 @@ export default function Header() {
         { name: 'Data Insights', href: '/data', icon: BarChart3 },
     ];
 
-    const formattedToday = new Intl.DateTimeFormat('en-CH', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    }).format(new Date());
+    const formattedToday = mounted
+        ? new Intl.DateTimeFormat('en-CH', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+        }).format(new Date())
+        : '';
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-gray-200/50 shadow-sm">
@@ -156,7 +163,7 @@ export default function Header() {
                             <span className="text-xs font-semibold text-gray-600">{formattedToday}</span>
                         </div>
                         <div className="relative" ref={dropdownRef}>
-                            <button 
+                            <button
                                 onClick={() => setShowSettings(!showSettings)}
                                 className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                             >
@@ -167,7 +174,7 @@ export default function Header() {
                                 <div className="absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
                                     <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between">
                                         <h3 className="text-white font-bold text-lg">Quick Settings</h3>
-                                        <button 
+                                        <button
                                             onClick={() => setShowSettings(false)}
                                             className="text-white/80 hover:text-white transition-colors"
                                         >
@@ -182,7 +189,7 @@ export default function Header() {
                                                 <DollarSign className="w-4 h-4" />
                                                 Cleaning Prices (per m²)
                                             </div>
-                                            
+
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
