@@ -157,30 +157,30 @@ export default function DataReviewDashboard() {
     }, {} as Record<string, Order[]>);
 
     return (
-        <div className="max-w-7xl mx-auto p-6 space-y-8 page-transition">
-            <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-8 page-transition mb-20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{t.insights.title}</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{t.insights.title}</h2>
                     <p className="text-gray-500 text-sm mt-1 font-medium">{t.insights.subtitle}</p>
                 </div>
                 <button
                     onClick={exportToCSV}
-                    className="flex items-center px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all font-bold text-sm"
+                    className="flex items-center justify-center px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all font-bold text-sm w-full sm:w-auto"
                 >
-                    <Download className="w-4 h-4 mr-2 text-blue-600" />
-                    {t.insights.export_csv}
+                    <Download className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{t.insights.export_csv}</span>
                 </button>
             </div>
 
             {/* Managerial Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div className="lg:col-span-2 premium-card p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+                <div className="lg:col-span-2 premium-card p-4 sm:p-6 space-y-6">
                     <div className="flex items-center justify-between">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4 text-blue-600" />
-                            {t.insights.pipeline}
+                            <BarChart3 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                            <span className="whitespace-nowrap">{t.insights.pipeline}</span>
                         </h3>
-                        <div className="bg-blue-50 px-2.5 py-1 rounded text-[10px] font-black text-blue-700 uppercase">
+                        <div className="bg-blue-50 px-2.5 py-1 rounded text-[10px] font-black text-blue-700 uppercase whitespace-nowrap">
                             {t.insights.rugs_total(analytics.totalItemsCount)}
                         </div>
                     </div>
@@ -214,24 +214,24 @@ export default function DataReviewDashboard() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-3 bg-gray-900 text-white p-7 rounded-2xl shadow-xl flex flex-col relative overflow-hidden group">
+                <div className="lg:col-span-3 bg-gray-900 text-white p-5 sm:p-7 rounded-2xl shadow-xl flex flex-col relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-blue-500/20 transition-colors"></div>
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-6 text-gray-500">{t.insights.top_accounts}</h3>
-                    <div className="flex-1 space-y-5 relative z-10">
+                    <div className="flex-1 space-y-4 sm:space-y-5 relative z-10">
                         {analytics.topClients.map(([name, revenue], idx) => (
-                            <div key={name} className="flex items-center justify-between group/item">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-[10px] text-gray-600 font-mono w-4">{idx + 1}</span>
-                                    <span className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors truncate max-w-[280px]">{name}</span>
+                            <div key={name} className="flex items-center justify-between group/item gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                    <span className="text-[10px] text-gray-600 font-mono w-4 flex-shrink-0">{idx + 1}</span>
+                                    <span className="text-sm font-bold text-gray-200 group-hover/item:text-white transition-colors truncate">{name}</span>
                                 </div>
-                                <span className="text-sm font-black text-blue-400 group-hover/item:scale-105 transition-transform">CHF {revenue.toLocaleString()}</span>
+                                <span className="text-sm font-black text-blue-400 group-hover/item:scale-105 transition-transform whitespace-nowrap">CHF {revenue.toLocaleString()}</span>
                             </div>
                         ))}
                         {analytics.topClients.length === 0 && (
                             <div className="h-full flex items-center justify-center text-gray-600 text-xs font-bold uppercase tracking-widest">{t.insights.no_revenue}</div>
                         )}
                     </div>
-                    <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
                         <span>{t.insights.currency_label}</span>
                         <span className="text-white">{t.insights.currency_value}</span>
                     </div>
@@ -269,43 +269,41 @@ export default function DataReviewDashboard() {
 
                 {Object.entries(clientGroups).map(([clientName, clientOrders]) => (
                     <div key={clientName} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all hover:shadow-md">
-                        <div className="bg-white px-6 py-5 border-b border-gray-50 flex items-center justify-between">
+                        <div className="bg-white px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div>
-                                <h3 className="text-lg font-black text-gray-900">{clientName}</h3>
-                                <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                <h3 className="text-lg font-black text-gray-900 break-words">{clientName}</h3>
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">
                                         {t.insights.orders_count(clientOrders.length)}
                                     </span>
-                                    <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
+                                    <span className="w-1 h-1 bg-gray-300 rounded-full flex-shrink-0"></span>
+                                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest whitespace-nowrap">
                                         {t.insights.items_count(clientOrders.reduce((sum, o) => sum + o.items.length, 0))}
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => {
-                                        const client = clientOrders[0].client;
-                                        if (client) {
-                                            setEditingClient(client);
-                                            setClientForm(client);
-                                        }
-                                    }}
-                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                >
-                                    <Eye className="w-5 h-5" />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => {
+                                    const client = clientOrders[0].client;
+                                    if (client) {
+                                        setEditingClient(client);
+                                        setClientForm(client);
+                                    }
+                                }}
+                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+                            >
+                                <Eye className="w-5 h-5" />
+                            </button>
                         </div>
 
                         <div className="divide-y divide-gray-50">
                             {clientOrders.map(order => (
-                                <div key={order.id} className="p-4 bg-white">
-                                    <div className="flex items-center justify-between mb-4 px-2">
-                                        <div className="flex items-center gap-4">
-                                            <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded text-sm">{order.id}</span>
+                                <div key={order.id} className="p-3 sm:p-4 bg-white">
+                                    <div className="flex flex-wrap items-center justify-between mb-3 sm:mb-4 px-0 sm:px-2 gap-2">
+                                        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                                            <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded text-sm whitespace-nowrap">{order.id}</span>
                                             {(order.requiresCleaningApproval || order.requiresRepairApproval) && (
-                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full border ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved')
+                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full border whitespace-nowrap ${(order.cleaningApprovalStatus === 'approved' || order.repairApprovalStatus === 'approved')
                                                     ? 'bg-green-50 text-green-700 border-green-100'
                                                     : 'bg-orange-50 text-orange-700 border-orange-100'
                                                     }`}>
@@ -314,26 +312,26 @@ export default function DataReviewDashboard() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="overflow-x-auto rounded-xl border border-gray-100">
-                                        <table className="w-full text-sm">
+                                    <div className="overflow-x-auto rounded-xl border border-gray-100 -mx-4 sm:mx-0">
+                                        <table className="w-full text-sm min-w-[600px]">
                                             <thead className="bg-gray-50/50 text-[10px] font-black text-gray-400 uppercase tracking-wider">
                                                 <tr>
-                                                    <th className="px-4 py-3 text-left">{t.insights.table_item}</th>
-                                                    <th className="px-4 py-3 text-left">{t.insights.table_status}</th>
-                                                    <th className="px-4 py-3 text-right">{t.insights.table_cleaning}</th>
-                                                    <th className="px-4 py-3 text-right">{t.insights.table_repair}</th>
+                                                    <th className="px-3 sm:px-4 py-3 text-left whitespace-nowrap">{t.insights.table_item}</th>
+                                                    <th className="px-3 sm:px-4 py-3 text-left whitespace-nowrap">{t.insights.table_status}</th>
+                                                    <th className="px-3 sm:px-4 py-3 text-right whitespace-nowrap">{t.insights.table_cleaning}</th>
+                                                    <th className="px-3 sm:px-4 py-3 text-right whitespace-nowrap">{t.insights.table_repair}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-50">
                                                 {order.items.map(item => (
                                                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                                                        <td className="px-4 py-3">
-                                                            <div className="flex flex-col">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-bold text-gray-900">#{item.id}</span>
+                                                        <td className="px-3 sm:px-4 py-3">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    <span className="font-bold text-gray-900 whitespace-nowrap">#{item.id}</span>
                                                                     {item.individualClient && (
-                                                                        <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-bold">
-                                                                            <User className="w-2.5 h-2.5" />
+                                                                        <span className="inline-flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+                                                                            <User className="w-2.5 h-2.5 flex-shrink-0" />
                                                                             {item.individualClient}
                                                                         </span>
                                                                     )}
@@ -341,11 +339,11 @@ export default function DataReviewDashboard() {
                                                                 <span className="text-[10px] text-gray-400 font-medium">{item.material || t.insights.carpet_default} • {item.state}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-4 py-3">
-                                                            <span className="text-[10px] font-black uppercase text-gray-500">{t.common[item.status as keyof typeof t.common] || item.status.replace('_', ' ')}</span>
+                                                        <td className="px-3 sm:px-4 py-3">
+                                                            <span className="text-[10px] font-black uppercase text-gray-500 whitespace-nowrap">{t.common[item.status as keyof typeof t.common] || item.status.replace('_', ' ')}</span>
                                                         </td>
-                                                        <td className="px-4 py-3 text-right font-bold text-gray-900">{item.cleaningCost?.toFixed(2) || '0.00'}</td>
-                                                        <td className="px-4 py-3 text-right font-bold text-orange-500">{item.repairCost?.toFixed(2) || '0.00'}</td>
+                                                        <td className="px-3 sm:px-4 py-3 text-right font-bold text-gray-900 whitespace-nowrap">{item.cleaningCost?.toFixed(2) || '0.00'}</td>
+                                                        <td className="px-3 sm:px-4 py-3 text-right font-bold text-orange-500 whitespace-nowrap">{item.repairCost?.toFixed(2) || '0.00'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>

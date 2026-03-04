@@ -126,13 +126,13 @@ export default function RepairDashboard() {
     const repairOrders = Array.from(repairOrdersMap.values());
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-6 page-transition">
-            <div className="flex justify-between items-center">
+        <div className="max-w-4xl mx-auto p-4 space-y-6 page-transition mb-20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                    <Hammer className="w-6 h-6 mr-2 text-orange-600" />
+                    <Hammer className="w-6 h-6 mr-2 text-orange-600 flex-shrink-0" />
                     {t.repair.dashboard}
                 </h2>
-                <div className="bg-orange-50 px-3 py-1 rounded-full border border-orange-100 flex items-center">
+                <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100 flex items-center">
                     <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none mr-2">{t.header.delivery}</span>
                     <span className="text-lg font-black text-orange-800 leading-none">{repairOrders.length}</span>
                 </div>
@@ -141,26 +141,26 @@ export default function RepairDashboard() {
             <div className="space-y-4">
                 {repairOrders.map(order => (
                     <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
-                            <div className="flex items-center gap-6">
-                                <span className="font-mono font-bold text-gray-900">{order.id}</span>
-                                <div className="h-4 w-px bg-gray-200"></div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-gray-700">{order.client?.name || t.common.error}</span>
+                        <div className="bg-gray-50/50 px-4 sm:px-6 py-4 border-b border-gray-100">
+                            <div className="flex flex-col gap-4">
+                                {/* Order Header */}
+                                <div className="flex items-center justify-between">
+                                    <span className="font-mono font-bold text-gray-900">{order.id}</span>
                                     <button
                                         onClick={() => { if (order.client) { setEditingClient(order.client); setClientForm(order.client); } }}
-                                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
                                     >
-                                        <Edit className="w-3.5 h-3.5" />
+                                        <Edit className="w-4 h-4" />
                                     </button>
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2">
-                                    {/* Only show status badge if estimate has been sent (not "not_needed") */}
+                                {/* Client Name */}
+                                <div className="text-sm font-bold text-gray-700">{order.client?.name || t.common.error}</div>
+
+                                {/* Approval Controls - Stack on Mobile */}
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                                     {order.repairApprovalStatus !== 'not_needed' && (
-                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${order.repairApprovalStatus === 'approved'
+                                        <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg flex-shrink-0 ${order.repairApprovalStatus === 'approved'
                                             ? 'bg-green-100 text-green-700'
                                             : order.repairApprovalStatus === 'rejected'
                                                 ? 'bg-red-100 text-red-700'
@@ -180,7 +180,7 @@ export default function RepairDashboard() {
                                             !order.repairItems.some(item => (item.repairCost || 0) > 0) ||
                                             (order.repairApprovalStatus === 'pending' || order.repairApprovalStatus === 'approved')
                                         }
-                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+                                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-sm text-xs font-bold disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-300 w-full sm:w-auto"
                                         title={
                                             !order.repairItems.some(item => (item.repairCost || 0) > 0)
                                                 ? t.repair.add_estimates_first
@@ -189,8 +189,8 @@ export default function RepairDashboard() {
                                                     : t.repair.send_repair
                                         }
                                     >
-                                        <Mail className="w-3 h-3" />
-                                        {t.repair.send_repair}
+                                        <Mail className="w-3 h-3 flex-shrink-0" />
+                                        <span className="whitespace-nowrap">{t.repair.send_repair}</span>
                                     </button>
                                 </div>
                             </div>
@@ -198,23 +198,23 @@ export default function RepairDashboard() {
 
                         <div className="divide-y divide-gray-50">
                             {order.repairItems.map(item => (
-                                <div key={item.id} className="p-5 hover:bg-gray-50/50 transition-colors">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center space-x-3">
+                                <div key={item.id} className="p-4 sm:p-5 hover:bg-gray-50/50 transition-colors">
+                                    <div className="flex flex-col gap-3">
+                                        {/* Item Header */}
+                                        <div className="flex items-center justify-between">
                                             <span className="font-mono font-bold text-gray-900 px-2 py-1 bg-gray-100 rounded text-sm">#{item.id}</span>
+                                            {item.repairCost && item.repairCost > 0 ? (
+                                                <span className="text-[10px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-100 flex items-center uppercase tracking-wider whitespace-nowrap">
+                                                    <CheckCircle className="w-3 h-3 mr-1 flex-shrink-0" /> {t.repair.estimate_ready} (CHF {item.repairCost.toFixed(2)})
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-bold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-100 flex items-center uppercase tracking-wider animate-pulse whitespace-nowrap">
+                                                    <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" /> {t.repair.needs_estimate}
+                                                </span>
+                                            )}
                                         </div>
-                                        {item.repairCost && item.repairCost > 0 ? (
-                                            <span className="text-[10px] font-bold bg-green-50 text-green-700 px-2.5 py-1 rounded-full border border-green-100 flex items-center uppercase tracking-wider">
-                                                <CheckCircle className="w-3 h-3 mr-1" /> {t.repair.estimate_ready} (CHF {item.repairCost.toFixed(2)})
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] font-bold bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-100 flex items-center uppercase tracking-wider animate-pulse">
-                                                <AlertTriangle className="w-3 h-3 mr-1" /> {t.repair.needs_estimate}
-                                            </span>
-                                        )}
-                                    </div>
 
-                                    <div className="flex justify-between items-end">
+                                        {/* Item Details */}
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-xs font-bold text-gray-400 uppercase">{t.repair.condition}:</span>
@@ -227,9 +227,10 @@ export default function RepairDashboard() {
                                             )}
                                         </div>
 
+                                        {/* Action Button - Full Width on Mobile */}
                                         <Link
                                             href={`/repair/${order.id}/${item.id}`}
-                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-100 transition-all active:scale-95"
+                                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-100 transition-all active:scale-95 text-center"
                                         >
                                             {(item.repairCost || 0) > 0 ? t.repair.edit_estimate : t.repair.create_estimate}
                                         </Link>

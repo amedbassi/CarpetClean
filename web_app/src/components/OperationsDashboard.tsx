@@ -130,23 +130,23 @@ export default function OperationsDashboard() {
     const readyCount = orders.flatMap(o => o.items).filter(i => i.status === 'ready_for_delivery').length;
 
     return (
-        <div className="max-w-5xl mx-auto p-4 space-y-8 page-transition">
-            <div className="flex justify-between items-center">
+        <div className="max-w-5xl mx-auto p-4 space-y-8 page-transition mb-20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t.operations.dashboard}</h2>
                     <p className="text-sm text-gray-500 font-medium">{t.operations.meas_status_mgmt}</p>
                 </div>
-                <div className="flex gap-4">
-                    <div className="bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100 text-center">
+                <div className="flex gap-2 sm:gap-4 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+                    <div className="bg-yellow-50 px-3 py-1.5 rounded-xl border border-yellow-100 text-center flex-shrink-0">
                         <span className="block text-[10px] font-black text-yellow-600 uppercase tracking-widest">{t.common.pending}</span>
                         <span className="text-lg font-black text-yellow-800 leading-none">{pendingCount}</span>
                     </div>
-                    <div className="bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 text-center">
+                    <div className="bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-100 text-center flex-shrink-0">
                         <span className="block text-[10px] font-black text-blue-600 uppercase tracking-widest">{t.common.measured}</span>
                         <span className="text-lg font-black text-blue-800 leading-none">{measuredCount}</span>
                     </div>
-                    <div className="bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 text-center">
-                        <span className="block text-[10px] font-black text-green-600 uppercase tracking-widest">{t.common.ready_for_delivery}</span>
+                    <div className="bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 text-center flex-shrink-0">
+                        <span className="block text-[10px] font-black text-green-600 uppercase tracking-widest whitespace-nowrap">{t.common.ready_for_delivery}</span>
                         <span className="text-lg font-black text-green-800 leading-none">{readyCount}</span>
                     </div>
                 </div>
@@ -157,105 +157,110 @@ export default function OperationsDashboard() {
                     .filter(order => !order.items.every(item => item.status === 'delivered'))
                     .map(order => (
                         <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                            <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4">
-                                <div className="flex items-center gap-6">
-                                    <div className="flex items-center gap-2">
-                                        <Hash className="w-4 h-4 text-gray-400" />
-                                        <span className="font-mono font-bold text-gray-900">{order.id}</span>
-                                    </div>
-                                    <div className="h-4 w-px bg-gray-200"></div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-bold text-gray-700">{order.client?.name || 'Unknown Client'}</span>
+                            <div className="bg-gray-50/50 px-4 sm:px-6 py-4 border-b border-gray-100">
+                                <div className="flex flex-col gap-4">
+                                    {/* Order Header - Mobile Optimized */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Hash className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                            <span className="font-mono font-bold text-gray-900">{order.id}</span>
+                                        </div>
                                         <button
                                             onClick={() => { if (order.client) { setEditingClient(order.client); setClientForm(order.client); } }}
-                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
                                         >
-                                            <Edit className="w-3.5 h-3.5" />
+                                            <Edit className="w-4 h-4" />
                                         </button>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center gap-3">
-                                    <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            checked={order.requiresCleaningApproval}
-                                            onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval)}
-                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        />
-                                        {t.operations.cleaning_approval}
-                                    </label>
+                                    {/* Client Name */}
+                                    <div className="text-sm font-bold text-gray-700">{order.client?.name || 'Unknown Client'}</div>
 
-                                    {order.requiresCleaningApproval && (
-                                        <div className="flex items-center gap-2">
-                                            {/* Only show status badge if estimate has been sent (not "not_needed") */}
-                                            {order.cleaningApprovalStatus !== 'not_needed' && (
-                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${order.cleaningApprovalStatus === 'approved'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : order.cleaningApprovalStatus === 'rejected'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-orange-100 text-orange-700'
-                                                    }`}>
-                                                    {order.cleaningApprovalStatus === 'approved'
-                                                        ? t.common.approved
+                                    {/* Approval Controls - Stack on Mobile */}
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                        <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors w-full sm:w-auto">
+                                            <input
+                                                type="checkbox"
+                                                checked={order.requiresCleaningApproval}
+                                                onChange={() => toggleApprovalRequired(order.id, order.requiresCleaningApproval)}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                                            />
+                                            <span className="whitespace-nowrap">{t.operations.cleaning_approval}</span>
+                                        </label>
+
+                                        {order.requiresCleaningApproval && (
+                                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                                {order.cleaningApprovalStatus !== 'not_needed' && (
+                                                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg flex-shrink-0 ${order.cleaningApprovalStatus === 'approved'
+                                                        ? 'bg-green-100 text-green-700'
                                                         : order.cleaningApprovalStatus === 'rejected'
-                                                            ? t.common.rejected
-                                                            : t.common.pending}
-                                                </span>
-                                            )}
+                                                            ? 'bg-red-100 text-red-700'
+                                                            : 'bg-orange-100 text-orange-700'
+                                                        }`}>
+                                                        {order.cleaningApprovalStatus === 'approved'
+                                                            ? t.common.approved
+                                                            : order.cleaningApprovalStatus === 'rejected'
+                                                                ? t.common.rejected
+                                                                : t.common.pending}
+                                                    </span>
+                                                )}
 
-                                            {order.requiresCleaningApproval && (
                                                 <button
                                                     onClick={() => sendCleaningApprovalRequest(order)}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-xs font-bold"
+                                                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-xs font-bold w-full sm:w-auto"
                                                     title={t.operations.send_cleaning}
                                                 >
-                                                    <Mail className="w-3 h-3" />
-                                                    {t.operations.send_cleaning}
+                                                    <Mail className="w-3 h-3 flex-shrink-0" />
+                                                    <span className="whitespace-nowrap">{t.operations.send_cleaning}</span>
                                                 </button>
-                                            )}
-                                        </div>
-                                    )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="divide-y divide-gray-50">
                                 {order.items.map(item => (
-                                    <div key={item.id} className="p-5 hover:bg-gray-50/30 transition-colors">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <span className="font-mono font-bold text-gray-400 text-sm">#{item.id}</span>
-                                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${item.status === 'measured' ? 'bg-blue-50 text-blue-600' :
-                                                    item.status === 'ready_for_delivery' ? 'bg-green-50 text-green-600' :
-                                                        item.status === 'delivered' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-50 text-yellow-600'
-                                                    }`}>
-                                                    {item.status ? (t.common[item.status as keyof typeof t.common] || item.status) : t.common.pending}
-                                                </span>
+                                    <div key={item.id} className="p-4 sm:p-5 hover:bg-gray-50/30 transition-colors">
+                                        <div className="flex flex-col gap-3">
+                                            {/* Item Header */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono font-bold text-gray-400 text-sm">#{item.id}</span>
+                                                    <span className={`text-[10px] font-black uppercase px-2 py-1 rounded whitespace-nowrap ${item.status === 'measured' ? 'bg-blue-50 text-blue-600' :
+                                                        item.status === 'ready_for_delivery' ? 'bg-green-50 text-green-600' :
+                                                            item.status === 'delivered' ? 'bg-gray-100 text-gray-500' : 'bg-yellow-50 text-yellow-600'
+                                                        }`}>
+                                                        {item.status ? (t.common[item.status as keyof typeof t.common] || item.status) : t.common.pending}
+                                                    </span>
+                                                </div>
+
+                                                <Link
+                                                    href={`/operations/${order.id}/${item.id}`}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                                                >
+                                                    <Ruler className="w-5 h-5" />
+                                                </Link>
                                             </div>
 
-                                            <div className="flex items-center gap-3">
+                                            {/* Action Buttons - Full Width on Mobile */}
+                                            <div className="flex gap-2">
                                                 {item.status === 'measured' && (
                                                     <button
                                                         onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
                                                         disabled={order.requiresCleaningApproval && (order.cleaningApprovalStatus !== 'approved')}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-green-100 disabled:opacity-50 disabled:grayscale"
+                                                        className="flex items-center justify-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-green-100 disabled:opacity-50 disabled:grayscale flex-1 sm:flex-initial"
                                                     >
-                                                        <CheckCircle className="w-3 h-3" />
-                                                        {t.operations.mark_ready}
+                                                        <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                                                        <span className="whitespace-nowrap">{t.operations.mark_ready}</span>
                                                     </button>
                                                 )}
                                                 {item.status === 'ready_for_delivery' && (
-                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold">
-                                                        <Truck className="w-3 h-3" />
-                                                        {t.operations.ready_for_exit}
+                                                    <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold flex-1 sm:flex-initial">
+                                                        <Truck className="w-4 h-4 flex-shrink-0" />
+                                                        <span className="whitespace-nowrap">{t.operations.ready_for_exit}</span>
                                                     </div>
                                                 )}
-                                                <Link
-                                                    href={`/operations/${order.id}/${item.id}`}
-                                                    className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                                                >
-                                                    <Ruler className="w-4 h-4" />
-                                                </Link>
                                             </div>
                                         </div>
                                     </div>

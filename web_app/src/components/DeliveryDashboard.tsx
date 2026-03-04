@@ -112,14 +112,14 @@ export default function DeliveryDashboard() {
     );
 
     return (
-        <div className="max-w-4xl mx-auto p-4 space-y-8 page-transition">
-            <div className="flex justify-between items-center">
+        <div className="max-w-4xl mx-auto p-4 space-y-8 page-transition mb-20">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 tracking-tight">{t.delivery.dashboard}</h2>
                     <p className="text-sm text-gray-500 font-medium">{t.delivery.optimization}</p>
                 </div>
-                <div className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100 flex items-center">
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">{t.common.ready_for_delivery}</span>
+                <div className="bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 flex items-center">
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2 whitespace-nowrap">{t.common.ready_for_delivery}</span>
                     <span className="text-lg font-black text-blue-800 leading-none">{readyOrders.length}</span>
                 </div>
             </div>
@@ -174,7 +174,7 @@ export default function DeliveryDashboard() {
                                     : 'border-white hover:border-blue-100 shadow-sm'
                                     }`}
                             >
-                                <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="p-5 flex flex-col gap-4">
                                     <div className="flex items-start space-x-4">
                                         {sequenceNumber && (
                                             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
@@ -187,49 +187,53 @@ export default function DeliveryDashboard() {
                                             } flex items-center justify-center`}>
                                             {selectedIds.includes(order.id) && <CheckCircle className="w-4 h-4 text-white" />}
                                         </div>
-                                        <div className="space-y-1">
-                                            <div className="flex items-center space-x-3">
+                                        <div className="space-y-2 flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
                                                 <span className="font-mono font-bold text-gray-900 bg-gray-50 px-1.5 py-0.5 rounded text-sm">{order.id}</span>
-                                                <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                                <span className="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">
                                                     {t.delivery.items_count(order.items.length)}
                                                 </span>
                                             </div>
-                                            <p className="font-bold text-gray-800">{order.client?.name || t.common.error}</p>
-                                            <div className="flex items-center text-xs text-gray-400 font-medium">
-                                                <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
-                                                {order.client?.street && order.client?.number
-                                                    ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
-                                                    : t.delivery.no_address}
+                                            <p className="font-bold text-gray-800 break-words">{order.client?.name || t.common.error}</p>
+                                            <div className="flex items-start text-xs text-gray-400 font-medium">
+                                                <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                                <span className="break-words">
+                                                    {order.client?.street && order.client?.number
+                                                        ? `${order.client.street} ${order.client.number}, ${order.client.postalCode || ''} ${order.client.city || ''}`.trim()
+                                                        : t.delivery.no_address}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex md:flex-col items-center md:items-end justify-between gap-2">
-                                        <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                                            {mounted ? new Date(order.createdAt).toLocaleDateString(language === 'fr' ? 'fr-CH' : 'en-CH') : ''}
-                                        </span>
-                                        <div className="flex -space-x-1.5">
-                                            {order.items.slice(0, 5).map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    className={`w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black shadow-sm ${item.status === 'delivered' ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'
-                                                        }`}
-                                                >
-                                                    {item.id.split('-').pop()}
-                                                </div>
-                                            ))}
-                                            {order.items.length > 5 && (
-                                                <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[9px] font-black text-gray-400 shadow-sm">
-                                                    +{order.items.length - 5}
-                                                </div>
-                                            )}
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pl-14">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                            <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+                                                {mounted ? new Date(order.createdAt).toLocaleDateString(language === 'fr' ? 'fr-CH' : 'en-CH') : ''}
+                                            </span>
+                                            <div className="flex -space-x-1.5">
+                                                {order.items.slice(0, 5).map((item) => (
+                                                    <div
+                                                        key={item.id}
+                                                        className={`w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-[9px] font-black shadow-sm ${item.status === 'delivered' ? 'bg-gray-100 text-gray-400' : 'bg-green-100 text-green-700'
+                                                            }`}
+                                                    >
+                                                        {item.id.split('-').pop()}
+                                                    </div>
+                                                ))}
+                                                {order.items.length > 5 && (
+                                                    <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[9px] font-black text-gray-400 shadow-sm">
+                                                        +{order.items.length - 5}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setCompletingOrder(order);
                                             }}
-                                            className="mt-2 text-xs bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center self-end active:scale-95"
+                                            className="text-xs bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-gray-200 flex items-center justify-center active:scale-95 w-full sm:w-auto"
                                         >
                                             {t.delivery.complete}
                                         </button>
