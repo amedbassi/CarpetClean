@@ -3,12 +3,14 @@
 import React, { useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Eraser } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface SignaturePadProps {
     onEnd: (signatureData: string | null) => void;
 }
 
 export default function SignaturePad({ onEnd }: SignaturePadProps) {
+    const { t } = useLanguage();
     const sigCanvas = useRef<SignatureCanvas>(null);
 
     const clear = () => {
@@ -26,7 +28,7 @@ export default function SignaturePad({ onEnd }: SignaturePadProps) {
 
     return (
         <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Customer Signature</label>
+            <label className="block text-sm font-medium text-gray-700">{t.intake.signature}</label>
             <div className="border rounded-md shadow-sm bg-white touch-none">
                 <SignatureCanvas
                     ref={sigCanvas}
@@ -44,7 +46,7 @@ export default function SignaturePad({ onEnd }: SignaturePadProps) {
                     className="flex items-center text-sm text-red-600 hover:text-red-800"
                 >
                     <Eraser className="h-4 w-4 mr-1" />
-                    Clear Signature
+                    {t.intake.clear_signature}
                 </button>
             </div>
         </div>
