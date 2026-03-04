@@ -10,49 +10,47 @@ export function setupScrollBlur() {
   if (typeof window === 'undefined') return () => {};
   
   let scrollTimeout: NodeJS.Timeout;
-  let isScrolling = false;
+  let lastScrollTime = 0;
   
-  const handleScrollStart = () => {
-    isScrolling = true;
+  const handleScroll = () => {
+    const now = Date.now();
+    lastScrollTime = now;
+    
     clearTimeout(scrollTimeout);
-  };
-  
-  const handleScrollEnd = () => {
+    
+    // Wait for scroll to stop before blurring
     scrollTimeout = setTimeout(() => {
-      isScrolling = false;
-      const activeElement = document.activeElement as HTMLElement;
-      if (
-        activeElement &&
-        (activeElement.tagName === 'INPUT' ||
-          activeElement.tagName === 'TEXTAREA' ||
-          activeElement.tagName === 'SELECT')
-      ) {
-        activeElement.blur();
+      // Only blur if we actually scrolled (not just a touch)
+      if (Date.now() - lastScrollTime >= 200) {
+        const activeElement = document.activeElement as HTMLElement;
+        if (
+          activeElement &&
+          (activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.tagName === 'SELECT')
+        ) {
+          activeElement.blur();
+        }
       }
-    }, 150);
+    }, 200);
   };
 
-  window.addEventListener('scroll', handleScrollStart, { passive: true });
-  window.addEventListener('scroll', handleScrollEnd, { passive: true });
-  window.addEventListener('touchmove', handleScrollStart, { passive: true });
+  window.addEventListener('scroll', handleScroll, { passive: true });
   
   return () => {
-    window.removeEventListener('scroll', handleScrollStart);
-    window.removeEventListener('scroll', handleScrollEnd);
-    window.removeEventListener('touchmove', handleScrollStart);
+    window.removeEventListener('scroll', handleScroll);
     clearTimeout(scrollTimeout);
   };
 }
 
 /**
  * Prevent input blur on first tap (fixes double-tap issue)
- * Call this in form components to improve mobile input behavior
+ * This is the key fix for iOS keyboard issues
  */
 export function preventInputBlurOnScroll() {
   if (typeof window === 'undefined') return () => {};
   
-  let lastTouchTime = 0;
-  
+  // Prevent iOS from requiring double-tap
   const handleTouchStart = (e: TouchEvent) => {
     const target = e.target as HTMLElement;
     if (
@@ -60,7 +58,11 @@ export function preventInputBlurOnScroll() {
       target.tagName === 'TEXTAREA' ||
       target.tagName === 'SELECT'
     ) {
-      lastTouchTime = Date.now();
+      // Don't prevent default - let native behavior work
+      // Just ensure the element is focusable
+      if (!target.hasAttribute('readonly') && !target.hasAttribute('disabled')) {
+        target.focus();
+      }
     }
   };
   
@@ -109,48 +111,15 @@ export function scrollToElement(element: HTMLElement, offset = 0) {
 }
 
 /**
- * Fix iOS input focus issues
- * Prevents the need for double-tap on inputs
- */
-export function fixIOSInputFocus() {
-  if (typeof window === 'undefined') return () => {};
-  
-  // Detect iOS
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  
-  if (!isIOS) return () => {};
-  
-  const handleTouchStart = (e: TouchEvent) => {
-    const target = e.target as HTMLElement;
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.tagName === 'SELECT'
-    ) {
-      // Prevent default to avoid iOS quirks
-      // Then manually focus
-      setTimeout(() => {
-        target.focus();
-      }, 0);
-    }
-  };
-  
-  document.addEventListener('touchstart', handleTouchStart, { passive: true });
-  
-  return () => {
-    document.removeEventListener('touchstart', handleTouchStart);
-  };
-}
-
-/**
  * Setup all mobile utilities at once
+ * This is the main function to call in components
  */
 export function setupMobileUtils() {
   const cleanupScrollBlur = setupScrollBlur();
-  const cleanupIOSFix = fixIOSInputFocus();
+  const cleanupInputFix = preventInputBlurOnScroll();
   
   return () => {
     cleanupScrollBlur();
-    cleanupIOSFix();
+    cleanupInputFix();
   };
 }

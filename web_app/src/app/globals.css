@@ -86,7 +86,7 @@ body {
   }
 }
 
-/* iOS Input Fix - Prevent zoom and improve focus */
+/* iOS Input Fix - Prevent zoom */
 input[type="text"],
 input[type="email"],
 input[type="tel"],
@@ -111,20 +111,6 @@ select {
 /* Prevent double-tap zoom on buttons */
 button {
   touch-action: manipulation;
-}
-
-/* Smooth scrolling for mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
-  /* Remove tap highlight on mobile */
-}
-
-/* Better focus states for mobile */
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  /* Handled by Tailwind focus: classes */
 }
 
 @keyframes slideDown {

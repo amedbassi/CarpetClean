@@ -213,27 +213,26 @@ export default function Header() {
                             >
                                 <Settings className="w-5 h-5" />
                             </button>
+                        </div>
+                    </div >
+                </div >
+            </div >
+        </header >
 
-                            {showSettings && (
-                                <>
-                                    {/* Mobile Overlay */}
-                                    <div
-                                        className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowSettings(false);
-                                        }}
-                                        onTouchEnd={(e) => {
-                                            e.stopPropagation();
-                                            setShowSettings(false);
-                                        }}
-                                    />
-                                    <div 
-                                        ref={settingsPanelRef}
-                                        className="fixed inset-0 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-50 overflow-hidden flex flex-col"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onTouchStart={(e) => e.stopPropagation()}
-                                    >
+            {/* Settings Panel - Rendered outside header for proper z-index */}
+            {showSettings && (
+                <>
+                    {/* Overlay - only on mobile */}
+                    <div
+                        className="fixed inset-0 bg-black/50 z-[60] md:hidden"
+                        onClick={() => setShowSettings(false)}
+                    />
+                    
+                    {/* Settings Panel */}
+                    <div 
+                        ref={settingsPanelRef}
+                        className="fixed inset-0 md:absolute md:top-20 md:right-6 md:inset-auto md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-[70] overflow-hidden flex flex-col"
+                    >
                                         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between flex-shrink-0">
                                             <h3 className="text-white font-bold text-lg">{t.header.settings}</h3>
                                             <button
@@ -425,13 +424,7 @@ export default function Header() {
                                         </div>
                                     </div>
                                 </>
-                            )
-                            }
-                        </div >
-                    </div >
-                </div >
-            </div >
-        </header >
+                            )}
 
             {/* Mobile Navigation Menu */}
             {showMobileMenu && (
