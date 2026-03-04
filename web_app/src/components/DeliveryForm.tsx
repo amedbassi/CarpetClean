@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, CheckCircle, Receipt, Trash2, Search, ScanLine, User, X, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { setupScrollBlur } from '@/lib/mobileUtils';
 import SignaturePad from './SignaturePad';
 
 interface CarpetItem {
@@ -97,6 +98,10 @@ export default function DeliveryForm() {
             .then(res => res.json())
             .then(data => { if (Array.isArray(data)) setClients(data); })
             .catch(err => console.error('Error fetching clients:', err));
+        
+        // Setup scroll blur for mobile keyboard
+        const cleanup = setupScrollBlur();
+        return cleanup;
     }, []);
 
     // Close dropdown on outside click

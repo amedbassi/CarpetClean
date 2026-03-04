@@ -1,6 +1,12 @@
-# Mobile Testing Guide - Quick Start
+# Mobile Testing Guide - Quick Start (Updated)
 
 ## 🚀 Quick Test on Your Phone
+
+### IMPORTANT: Critical Fixes Applied ✅
+- Settings panel now works on mobile
+- Keyboard auto-dismisses when scrolling
+- Body scroll locked for modals
+- All touch interactions improved
 
 ### Method 1: Using Browser DevTools (Fastest)
 
@@ -63,13 +69,23 @@
 - [ ] Can sign with finger smoothly
 - [ ] Submit button is easy to tap
 
-### Test 3: Settings (1 min)
+### Test 3: Settings (1 min) - FIXED ✅
 - [ ] Tap settings icon (gear)
 - [ ] Settings panel fills screen on phone
+- [ ] Tap overlay (dark area) - closes panel
+- [ ] Tap X button - closes panel
 - [ ] All inputs are easy to tap
-- [ ] Can scroll through all settings
+- [ ] Can scroll through all settings smoothly
+- [ ] Body doesn't scroll behind panel
 - [ ] Language switcher works
 - [ ] Save button is easy to tap
+
+### Test 3.5: Keyboard Behavior (1 min) - NEW ✅
+- [ ] Tap any input field - keyboard appears
+- [ ] Start scrolling - keyboard dismisses automatically
+- [ ] Tap outside input - keyboard dismisses
+- [ ] No keyboard blocking content after scroll
+- [ ] Works on all forms (Intake, Rug Details, Repair)
 
 ### Test 4: Rug Details (1 min)
 - [ ] Navigate to Operations
@@ -107,8 +123,13 @@
 
 ## 🐛 Common Issues & Fixes
 
-### Issue: Mobile menu doesn't appear
-**Fix**: Check screen width < 768px, refresh page
+### Issue: Settings panel doesn't respond to touch
+**Status**: FIXED ✅
+**Solution**: Settings now has proper mobile overlay and touch handling
+
+### Issue: Keyboard stays on screen when scrolling
+**Status**: FIXED ✅
+**Solution**: Keyboard auto-dismisses when scrolling (100ms debounce)
 
 ### Issue: Inputs are too small to tap
 **Fix**: Should be 48px height (py-3), check implementation

@@ -57,20 +57,38 @@ export default function Header() {
     }, [showSettings]);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+            // Only handle click outside on desktop (md and up)
+            if (window.innerWidth >= 768 && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setShowSettings(false);
             }
         };
 
         if (showSettings) {
             document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+            // Prevent body scroll when settings open on mobile
+            if (window.innerWidth < 768) {
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+            document.body.style.overflow = '';
         };
     }, [showSettings]);
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (showMobileMenu) {
+            document.body.style.overflow = 'hidden';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [showMobileMenu]);
 
     const loadSettings = async () => {
         try {
@@ -186,18 +204,27 @@ export default function Header() {
                             </button>
 
                             {showSettings && (
-                                <div className="fixed inset-0 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-50 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between">
-                                        <h3 className="text-white font-bold text-lg">{t.header.settings}</h3>
-                                        <button
-                                            onClick={() => setShowSettings(false)}
-                                            className="text-white/80 hover:text-white transition-colors"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
-                                    </div>
+                                <>
+                                    {/* Mobile Overlay */}
+                                    <div
+                                        className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                                        onClick={() => setShowSettings(false)}
+                                    />
+                                    <div className="fixed inset-0 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-50 overflow-hidden flex flex-col">
+                                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between flex-shrink-0">
+                                            <h3 className="text-white font-bold text-lg">{t.header.settings}</h3>
+                                            <button
+                                                onClick={() => setShowSettings(false)}
+                                                className="text-white/80 hover:text-white transition-colors p-2 -mr-2"
+                                            >
+                                                <X className="w-5 h-5" />
+                                            </button>
+                                        </div>
 
-                                    <div className="p-4 sm:p-5 space-y-5 max-h-[calc(100vh-140px)] md:max-h-[70vh] overflow-y-auto">
+                                        <div 
+                                            className="p-4 sm:p-5 space-y-5 flex-1 overflow-y-auto overscroll-contain"
+                                            style={{ WebkitOverflowScrolling: 'touch' }}
+                                        >
                                         {/* Pricing Section */}
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between">
@@ -362,18 +389,19 @@ export default function Header() {
                                         </div>
 
 
-                                    </div>
+                                        </div>
 
-                                    <div className="border-t border-gray-200 p-4 bg-gray-50">
-                                        <button
-                                            onClick={saveSettings}
-                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-                                        >
-                                            <Save className="w-4 h-4" />
-                                            {t.header.save_settings}
-                                        </button>
+                                        <div className="border-t border-gray-200 p-4 bg-gray-50 flex-shrink-0">
+                                            <button
+                                                onClick={saveSettings}
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 active:bg-blue-800 transition-all shadow-lg shadow-blue-100"
+                                            >
+                                                <Save className="w-4 h-4" />
+                                                {t.header.save_settings}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                </>
                             )
                             }
                         </div >

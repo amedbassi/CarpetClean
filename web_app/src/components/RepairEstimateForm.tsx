@@ -5,6 +5,7 @@ import { Save, ArrowLeft, Hammer } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
+import { setupScrollBlur } from '@/lib/mobileUtils';
 
 interface RepairEstimateFormProps {
     orderId: string;
@@ -39,6 +40,10 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                 console.error(err);
                 setLoading(false);
             });
+        
+        // Setup scroll blur for mobile keyboard
+        const cleanup = setupScrollBlur();
+        return cleanup;
     }, [orderId, itemId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
