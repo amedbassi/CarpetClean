@@ -245,7 +245,7 @@ export default function OperationsDashboard() {
 
                                             {/* Action Buttons - Full Width on Mobile */}
                                             <div className="flex gap-2">
-                                                {item.status === 'measured' && (
+                                                {(item.status === 'measured' || item.status === 'repair_estimated' || item.status === 'repair_needed') && (
                                                     <button
                                                         onClick={() => handleStatusUpdate(order.id, item.id, 'ready_for_delivery')}
                                                         disabled={order.requiresCleaningApproval && (order.cleaningApprovalStatus !== 'approved')}
