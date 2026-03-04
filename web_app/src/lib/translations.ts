@@ -51,6 +51,13 @@ export const translations = {
             currency: 'Currency',
             email_smtp: 'Email (SMTP)',
             save_settings: 'Save Settings',
+            email_settings: {
+                from_email: 'From Email',
+                smtp_host: 'SMTP Host',
+                port: 'Port',
+                username: 'Username',
+                password: 'Password'
+            }
         },
         intake: {
             new_order: 'New Order',
@@ -296,6 +303,13 @@ export const translations = {
             currency: 'Devise',
             email_smtp: 'Email (SMTP)',
             save_settings: 'Enregistrer les Paramètres',
+            email_settings: {
+                from_email: 'Email d\'expédition',
+                smtp_host: 'Hôte SMTP',
+                port: 'Port',
+                username: 'Nom d\'utilisateur',
+                password: 'Mot de passe'
+            }
         },
         intake: {
             new_order: 'Nouvelle Commande',

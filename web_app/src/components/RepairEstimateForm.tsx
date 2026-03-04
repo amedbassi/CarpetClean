@@ -84,7 +84,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading item details...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500">{t.repair_estimate.loading}</div>;
 
     return (
         <div className="max-w-md mx-auto p-4">

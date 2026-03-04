@@ -212,7 +212,7 @@ export default function Header() {
                                             <div className="grid grid-cols-2 gap-3">
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Wool
+                                                        {t.rug_details.materials.wool}
                                                     </label>
                                                     <div className="relative">
                                                         <input
@@ -230,7 +230,7 @@ export default function Header() {
 
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Silk
+                                                        {t.rug_details.materials.silk}
                                                     </label>
                                                     <div className="relative">
                                                         <input
@@ -248,7 +248,7 @@ export default function Header() {
 
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Cotton
+                                                        {t.rug_details.materials.cotton}
                                                     </label>
                                                     <div className="relative">
                                                         <input
@@ -266,7 +266,7 @@ export default function Header() {
 
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Synthetic
+                                                        {t.rug_details.materials.synthetic}
                                                     </label>
                                                     <div className="relative">
                                                         <input
@@ -284,7 +284,7 @@ export default function Header() {
 
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Other
+                                                        {t.rug_details.materials.other}
                                                     </label>
                                                     <div className="relative">
                                                         <input
@@ -360,7 +360,7 @@ export default function Header() {
 
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    From Email
+                                                    {t.header.email_settings.from_email}
                                                 </label>
                                                 <input
                                                     type="email"
@@ -374,7 +374,7 @@ export default function Header() {
                                             <div className="grid grid-cols-3 gap-2">
                                                 <div className="col-span-2 space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        SMTP Host
+                                                        {t.header.email_settings.smtp_host}
                                                     </label>
                                                     <input
                                                         type="text"
@@ -386,7 +386,7 @@ export default function Header() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                        Port
+                                                        {t.header.email_settings.port}
                                                     </label>
                                                     <input
                                                         type="number"
@@ -400,7 +400,7 @@ export default function Header() {
 
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    Username
+                                                    {t.header.email_settings.username}
                                                 </label>
                                                 <input
                                                     type="text"
@@ -413,7 +413,7 @@ export default function Header() {
 
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                                                    Password
+                                                    {t.header.email_settings.password}
                                                 </label>
                                                 <input
                                                     type="password"
@@ -436,12 +436,13 @@ export default function Header() {
                                         </button>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+                            )
+                            }
+                        </div >
+                    </div >
+                </div >
+            </div >
+        </header >
     );
 }
 
