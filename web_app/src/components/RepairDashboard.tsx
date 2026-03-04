@@ -104,16 +104,42 @@ export default function RepairDashboard() {
         }
     };
 
+    const handleMarkRepairComplete = async (orderId: string, itemId: string) => {
+        try {
+            const response = await fetch('/api/repair/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, itemId }),
+            });
+
+            if (response.ok) {
+                alert(t.repair.completed_success);
+                window.location.reload();
+            } else {
+                alert('Failed to mark repair as complete');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error marking repair complete');
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-gray-500 font-medium">{t.common.loading}</div>;
 
-    // Group repair items by order (exclude fully delivered orders)
+    // Group repair items by order (exclude fully delivered orders and rejected repairs)
     const repairOrdersMap = new Map<string, RepairOrder>();
     orders
-        .filter(order => !order.items.every(item => item.status === 'delivered'))
+        .filter(order => 
+            !order.items.every(item => item.status === 'delivered') &&
+            order.repairApprovalStatus !== 'rejected'  // Hide rejected repairs
+        )
         .forEach(order => {
             const repairItems = order.items.filter(item =>
-                ['Worn', 'Damaged'].includes(item.state || '') ||
-                ['repair_needed', 'repair_estimated'].includes(item.status || '')
+                (
+                    ['Worn', 'Damaged'].includes(item.state || '') ||
+                    ['repair_needed', 'repair_estimated'].includes(item.status || '')
+                ) &&
+                !item.repairCompleted  // Hide completed repairs
             );
             if (repairItems.length > 0) {
                 repairOrdersMap.set(order.id, {
@@ -228,12 +254,33 @@ export default function RepairDashboard() {
                                         </div>
 
                                         {/* Action Button - Full Width on Mobile */}
-                                        <Link
-                                            href={`/repair/${order.id}/${item.id}`}
-                                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-100 transition-all active:scale-95 text-center"
-                                        >
-                                            {(item.repairCost || 0) > 0 ? t.repair.edit_estimate : t.repair.create_estimate}
-                                        </Link>
+                                        <div className="flex flex-col gap-2">
+                                            <Link
+                                                href={`/repair/${order.id}/${item.id}`}
+                                                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-blue-100 transition-all active:scale-95 text-center"
+                                            >
+                                                {(item.repairCost || 0) > 0 ? t.repair.edit_estimate : t.repair.create_estimate}
+                                            </Link>
+                                            
+                                            {(item.repairCost || 0) > 0 && order.repairApprovalStatus === 'approved' && (
+                                                <button
+                                                    onClick={() => handleMarkRepairComplete(order.id, item.id)}
+                                                    className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold shadow-sm shadow-green-100 transition-all active:scale-95"
+                                                >
+                                                    {t.repair.mark_complete}
+                                                </button>
+                                            )}
+                                            
+                                            {(item.repairCost || 0) > 0 && order.repairApprovalStatus === 'pending' && (
+                                                <button
+                                                    disabled
+                                                    title={t.repair.must_approve_first}
+                                                    className="px-4 py-2.5 bg-gray-300 text-gray-500 rounded-lg text-sm font-bold cursor-not-allowed"
+                                                >
+                                                    {t.repair.mark_complete}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

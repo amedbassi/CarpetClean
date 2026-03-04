@@ -24,6 +24,7 @@ export interface CarpetItem {
     cleaningCost: number | null;
     repairCost: number | null;
     repairDescription: string | null;
+    repairCompleted: boolean;
     individualClient: string | null;
 }
 

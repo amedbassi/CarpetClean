@@ -56,10 +56,12 @@ model CarpetItem {
   cleaningCost      Float?
   repairCost        Float?
   repairDescription String?
+  repairCompleted   Boolean @default(false)
   individualClient  String?
   order             Order   @relation(fields: [orderId], references: [id])
 
   @@id([orderId, id])
+  @@index([repairCompleted])
 }
 
 model Settings {
