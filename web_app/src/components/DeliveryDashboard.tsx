@@ -119,7 +119,7 @@ export default function DeliveryDashboard() {
                     <p className="text-sm text-gray-500 font-medium">{t.delivery.optimization}</p>
                 </div>
                 <div className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100 flex items-center">
-                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">{t.common.ready}</span>
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-widest leading-none mr-2">{t.common.ready_for_delivery}</span>
                     <span className="text-lg font-black text-blue-800 leading-none">{readyOrders.length}</span>
                 </div>
             </div>

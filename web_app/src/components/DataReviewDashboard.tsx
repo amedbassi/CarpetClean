@@ -197,7 +197,9 @@ export default function DataReviewDashboard() {
                             return (
                                 <div key={status} className="group">
                                     <div className="flex justify-between items-end mb-2">
-                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">{status.replace(/_/g, ' ')}</span>
+                                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">
+                                            {t.common[status as keyof typeof t.common] || status.replace(/_/g, ' ')}
+                                        </span>
                                         <span className="text-xs font-bold text-gray-900">{count} <span className="text-gray-300 font-medium ml-1">({percentage.toFixed(0)}%)</span></span>
                                     </div>
                                     <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -257,7 +259,7 @@ export default function DataReviewDashboard() {
                             <option value="all">{t.insights.all_statuses}</option>
                             <option value="pending">{t.common.pending}</option>
                             <option value="measured">{t.common.measured}</option>
-                            <option value="ready_for_delivery">{t.common.ready}</option>
+                            <option value="ready_for_delivery">{t.common.ready_for_delivery}</option>
                             <option value="delivered">{t.common.delivered}</option>
                             <option value="pending_approval">{t.common.pending_approval}</option>
                             <option value="approved">{t.common.approved}</option>

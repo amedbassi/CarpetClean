@@ -146,7 +146,7 @@ export default function OperationsDashboard() {
                         <span className="text-lg font-black text-blue-800 leading-none">{measuredCount}</span>
                     </div>
                     <div className="bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 text-center">
-                        <span className="block text-[10px] font-black text-green-600 uppercase tracking-widest">{t.common.ready}</span>
+                        <span className="block text-[10px] font-black text-green-600 uppercase tracking-widest">{t.common.ready_for_delivery}</span>
                         <span className="text-lg font-black text-green-800 leading-none">{readyCount}</span>
                     </div>
                 </div>
@@ -191,10 +191,10 @@ export default function OperationsDashboard() {
                                             {/* Only show status badge if estimate has been sent (not "not_needed") */}
                                             {order.cleaningApprovalStatus !== 'not_needed' && (
                                                 <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg ${order.cleaningApprovalStatus === 'approved'
-                                                        ? 'bg-green-100 text-green-700'
-                                                        : order.cleaningApprovalStatus === 'rejected'
-                                                            ? 'bg-red-100 text-red-700'
-                                                            : 'bg-orange-100 text-orange-700'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : order.cleaningApprovalStatus === 'rejected'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-orange-100 text-orange-700'
                                                     }`}>
                                                     {order.cleaningApprovalStatus === 'approved'
                                                         ? t.common.approved
