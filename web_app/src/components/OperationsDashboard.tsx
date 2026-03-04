@@ -56,7 +56,7 @@ export default function OperationsDashboard() {
         }
 
         // Copy link to clipboard first (as backup)
-        const approvalLink = `${window.location.origin}/approve/${order.id}`;
+        const approvalLink = `${window.location.origin}/approve/${order.id}/cleaning`;
         try {
             await navigator.clipboard.writeText(approvalLink);
         } catch (err) {

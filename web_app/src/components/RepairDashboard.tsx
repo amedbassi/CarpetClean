@@ -35,7 +35,7 @@ export default function RepairDashboard() {
         }
 
         // Copy link to clipboard first (as backup)
-        const approvalLink = `${window.location.origin}/approve/${order.id}`;
+        const approvalLink = `${window.location.origin}/approve/${order.id}/repair`;
         try {
             await navigator.clipboard.writeText(approvalLink);
         } catch (err) {
