@@ -4,16 +4,22 @@
 
 /**
  * Blur active input when scrolling to dismiss keyboard on mobile
+ * This helps prevent the keyboard from staying on screen
  */
 export function setupScrollBlur() {
-  let scrollTimeout: NodeJS.Timeout;
+  if (typeof window === 'undefined') return () => {};
   
-  const handleScroll = () => {
-    // Clear previous timeout
+  let scrollTimeout: NodeJS.Timeout;
+  let isScrolling = false;
+  
+  const handleScrollStart = () => {
+    isScrolling = true;
     clearTimeout(scrollTimeout);
-    
-    // Set new timeout to blur after scroll stops
+  };
+  
+  const handleScrollEnd = () => {
     scrollTimeout = setTimeout(() => {
+      isScrolling = false;
       const activeElement = document.activeElement as HTMLElement;
       if (
         activeElement &&
@@ -23,14 +29,45 @@ export function setupScrollBlur() {
       ) {
         activeElement.blur();
       }
-    }, 100);
+    }, 150);
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scroll', handleScrollStart, { passive: true });
+  window.addEventListener('scroll', handleScrollEnd, { passive: true });
+  window.addEventListener('touchmove', handleScrollStart, { passive: true });
   
   return () => {
-    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('scroll', handleScrollStart);
+    window.removeEventListener('scroll', handleScrollEnd);
+    window.removeEventListener('touchmove', handleScrollStart);
     clearTimeout(scrollTimeout);
+  };
+}
+
+/**
+ * Prevent input blur on first tap (fixes double-tap issue)
+ * Call this in form components to improve mobile input behavior
+ */
+export function preventInputBlurOnScroll() {
+  if (typeof window === 'undefined') return () => {};
+  
+  let lastTouchTime = 0;
+  
+  const handleTouchStart = (e: TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT'
+    ) {
+      lastTouchTime = Date.now();
+    }
+  };
+  
+  document.addEventListener('touchstart', handleTouchStart, { passive: true });
+  
+  return () => {
+    document.removeEventListener('touchstart', handleTouchStart);
   };
 }
 
@@ -69,4 +106,51 @@ export function scrollToElement(element: HTMLElement, offset = 0) {
     top: offsetPosition,
     behavior: 'smooth'
   });
+}
+
+/**
+ * Fix iOS input focus issues
+ * Prevents the need for double-tap on inputs
+ */
+export function fixIOSInputFocus() {
+  if (typeof window === 'undefined') return () => {};
+  
+  // Detect iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  if (!isIOS) return () => {};
+  
+  const handleTouchStart = (e: TouchEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT'
+    ) {
+      // Prevent default to avoid iOS quirks
+      // Then manually focus
+      setTimeout(() => {
+        target.focus();
+      }, 0);
+    }
+  };
+  
+  document.addEventListener('touchstart', handleTouchStart, { passive: true });
+  
+  return () => {
+    document.removeEventListener('touchstart', handleTouchStart);
+  };
+}
+
+/**
+ * Setup all mobile utilities at once
+ */
+export function setupMobileUtils() {
+  const cleanupScrollBlur = setupScrollBlur();
+  const cleanupIOSFix = fixIOSInputFocus();
+  
+  return () => {
+    cleanupScrollBlur();
+    cleanupIOSFix();
+  };
 }

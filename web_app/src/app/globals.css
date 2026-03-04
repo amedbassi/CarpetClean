@@ -86,6 +86,47 @@ body {
   }
 }
 
+/* iOS Input Fix - Prevent zoom and improve focus */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px !important;
+  /* Prevents iOS zoom on focus */
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select,
+  button {
+    min-height: 44px;
+    /* Apple's minimum touch target */
+  }
+}
+
+/* Prevent double-tap zoom on buttons */
+button {
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling for mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+  /* Remove tap highlight on mobile */
+}
+
+/* Better focus states for mobile */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  /* Handled by Tailwind focus: classes */
+}
+
 @keyframes slideDown {
   from {
     transform: translateY(-10px);

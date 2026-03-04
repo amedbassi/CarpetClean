@@ -5,7 +5,7 @@ import { Camera, Save, ArrowLeft, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
-import { setupScrollBlur } from '@/lib/mobileUtils';
+import { setupMobileUtils } from '@/lib/mobileUtils';
 
 interface RugDetailFormProps {
     orderId: string;
@@ -94,8 +94,8 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
 
         fetchRugData();
         
-        // Setup scroll blur for mobile keyboard
-        const cleanup = setupScrollBlur();
+        // Setup mobile utilities
+        const cleanup = setupMobileUtils();
         return cleanup;
     }, [orderId, itemId]);
 

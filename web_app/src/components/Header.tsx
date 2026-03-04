@@ -45,6 +45,7 @@ export default function Header() {
         emailPassword: '',
     });
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const settingsPanelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -57,26 +58,36 @@ export default function Header() {
     }, [showSettings]);
 
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+        const handleClickOutside = (event: MouseEvent) => {
             // Only handle click outside on desktop (md and up)
-            if (window.innerWidth >= 768 && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setShowSettings(false);
+            if (window.innerWidth >= 768) {
+                const target = event.target as Node;
+                if (
+                    settingsPanelRef.current && 
+                    !settingsPanelRef.current.contains(target) &&
+                    dropdownRef.current &&
+                    !dropdownRef.current.contains(target)
+                ) {
+                    setShowSettings(false);
+                }
             }
         };
 
-        if (showSettings) {
+        if (showSettings && window.innerWidth >= 768) {
+            // Only add listener on desktop
             document.addEventListener('mousedown', handleClickOutside);
-            document.addEventListener('touchstart', handleClickOutside);
-            // Prevent body scroll when settings open on mobile
-            if (window.innerWidth < 768) {
-                document.body.style.overflow = 'hidden';
-            }
+        }
+
+        // Prevent body scroll when settings open on mobile
+        if (showSettings && window.innerWidth < 768) {
+            document.body.style.overflow = 'hidden';
         }
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('touchstart', handleClickOutside);
-            document.body.style.overflow = '';
+            if (window.innerWidth < 768) {
+                document.body.style.overflow = '';
+            }
         };
     }, [showSettings]);
 
@@ -208,9 +219,21 @@ export default function Header() {
                                     {/* Mobile Overlay */}
                                     <div
                                         className="fixed inset-0 bg-black/50 z-40 md:hidden"
-                                        onClick={() => setShowSettings(false)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowSettings(false);
+                                        }}
+                                        onTouchEnd={(e) => {
+                                            e.stopPropagation();
+                                            setShowSettings(false);
+                                        }}
                                     />
-                                    <div className="fixed inset-0 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-50 overflow-hidden flex flex-col">
+                                    <div 
+                                        ref={settingsPanelRef}
+                                        className="fixed inset-0 md:absolute md:inset-auto md:right-0 md:mt-2 md:w-96 bg-white md:rounded-2xl shadow-2xl border-0 md:border md:border-gray-200 z-50 overflow-hidden flex flex-col"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                    >
                                         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between flex-shrink-0">
                                             <h3 className="text-white font-bold text-lg">{t.header.settings}</h3>
                                             <button
