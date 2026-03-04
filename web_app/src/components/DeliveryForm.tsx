@@ -322,7 +322,7 @@ export default function DeliveryForm() {
     const isPartnerOrder = scannedReceipts.length > 0;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto p-4 bg-white rounded-xl shadow-lg">
+        <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg">
             <div className="flex justify-between items-center border-b pb-4">
                 <h2 className="text-xl font-semibold text-gray-800">{t.intake.new_order}</h2>
                 <span className="font-mono text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
@@ -356,7 +356,7 @@ export default function DeliveryForm() {
                             onFocus={() => {
                                 if (formData.clientName && filteredClients.length > 0) setShowDropdown(true);
                             }}
-                            className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-3 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder={t.intake.placeholder_name}
                             autoComplete="off"
                         />
@@ -370,7 +370,7 @@ export default function DeliveryForm() {
                                     key={client.id}
                                     type="button"
                                     onClick={() => selectClient(client)}
-                                    className="w-full text-left px-4 py-2 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b last:border-b-0"
+                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b last:border-b-0"
                                 >
                                     <div className="font-medium text-gray-900">{client.name}</div>
                                     {(client.phone || client.email) && (
@@ -389,43 +389,43 @@ export default function DeliveryForm() {
                 <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700">{t.intake.phone}</label>
                     <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder={t.intake.placeholder_phone} />
                 </div>
 
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">{t.intake.email}</label>
                     <input type="email" id="email" name="email" value={formData.email} onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder={t.intake.placeholder_email} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="street" className="block text-sm font-medium text-gray-700">{t.intake.street}</label>
                         <input type="text" id="street" name="street" value={formData.street} onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder={t.intake.placeholder_street} />
                     </div>
                     <div>
                         <label htmlFor="number" className="block text-sm font-medium text-gray-700">{t.intake.number}</label>
                         <input type="text" id="number" name="number" value={formData.number} onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder={t.intake.placeholder_number} />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700">{t.intake.postal_code}</label>
                         <input type="text" id="postalCode" name="postalCode" value={formData.postalCode} onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder={t.intake.placeholder_postal} />
                     </div>
                     <div>
                         <label htmlFor="city" className="block text-sm font-medium text-gray-700">{t.intake.city}</label>
                         <input type="text" id="city" name="city" value={formData.city} onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder={t.intake.placeholder_city} />
                     </div>
                 </div>
@@ -433,7 +433,7 @@ export default function DeliveryForm() {
                 <div>
                     <label htmlFor="country" className="block text-sm font-medium text-gray-700">{t.intake.country}</label>
                     <input type="text" id="country" name="country" value={formData.country} onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder={t.intake.placeholder_country} />
                 </div>
             </div>

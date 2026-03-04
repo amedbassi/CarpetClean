@@ -87,7 +87,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
     if (loading) return <div className="p-8 text-center text-gray-500">{t.repair_estimate.loading}</div>;
 
     return (
-        <div className="max-w-md mx-auto p-4">
+        <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
             <div className="flex items-center mb-6">
                 <Link href="/repair" className="mr-4 text-gray-600 hover:text-gray-900">
                     <ArrowLeft className="w-6 h-6" />
@@ -127,7 +127,7 @@ export default function RepairEstimateForm({ orderId, itemId }: RepairEstimateFo
                             type="number"
                             step="0.01"
                             required
-                            className="block w-full pl-12 pr-12 py-3 border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 text-lg font-bold"
+                            className="block w-full pl-12 pr-12 py-3 sm:py-4 border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 text-lg font-bold"
                             placeholder="0.00"
                             value={formData.repairCost}
                             onChange={e => setFormData(prev => ({ ...prev, repairCost: e.target.value }))}

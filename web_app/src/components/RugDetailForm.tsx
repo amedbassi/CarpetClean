@@ -145,7 +145,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
     };
 
     return (
-        <div className="max-w-md mx-auto p-4">
+        <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
             <div className="flex items-center mb-6">
                 <Link href="/operations" className="mr-4 text-gray-600 hover:text-gray-900">
                     <ArrowLeft className="w-6 h-6" />
@@ -208,7 +208,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                     </div>
 
                     {/* Dimensions */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="rug-length" className="block text-sm font-medium text-gray-700">{t.rug_details.length}</label>
                             <input
@@ -216,7 +216,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                                 type="number"
                                 step="0.01"
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 value={formData.length}
                                 onChange={e => setFormData(prev => ({ ...prev, length: e.target.value }))}
                             />
@@ -228,7 +228,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                                 type="number"
                                 step="0.01"
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 value={formData.width}
                                 onChange={e => setFormData(prev => ({ ...prev, width: e.target.value }))}
                             />
@@ -240,7 +240,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         <label htmlFor="rug-state" className="block text-sm font-medium text-gray-700">{t.rug_details.state}</label>
                         <select
                             id="rug-state"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.state}
                             onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
                         >
@@ -256,7 +256,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
                         <label htmlFor="rug-material" className="block text-sm font-medium text-gray-700">{t.rug_details.material}</label>
                         <select
                             id="rug-material"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            className="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
                             value={formData.material}
                             onChange={e => setFormData(prev => ({ ...prev, material: e.target.value }))}
                         >

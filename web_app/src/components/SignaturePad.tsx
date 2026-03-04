@@ -29,12 +29,12 @@ export default function SignaturePad({ onEnd }: SignaturePadProps) {
     return (
         <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">{t.intake.signature}</label>
-            <div className="border rounded-md shadow-sm bg-white touch-none">
+            <div className="border rounded-md shadow-sm bg-white">
                 <SignatureCanvas
                     ref={sigCanvas}
                     penColor="black"
                     canvasProps={{
-                        className: 'w-full h-40 rounded-md',
+                        className: 'w-full h-48 sm:h-40 rounded-md touch-none',
                     }}
                     onEnd={handleEnd}
                 />
@@ -43,7 +43,7 @@ export default function SignaturePad({ onEnd }: SignaturePadProps) {
                 <button
                     type="button"
                     onClick={clear}
-                    className="flex items-center text-sm text-red-600 hover:text-red-800"
+                    className="flex items-center px-3 py-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
                 >
                     <Eraser className="h-4 w-4 mr-1" />
                     {t.intake.clear_signature}

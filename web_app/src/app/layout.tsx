@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   description: "Internal delivery management system",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 import { LanguageProvider } from "@/lib/LanguageContext";
 
 export default function RootLayout({
