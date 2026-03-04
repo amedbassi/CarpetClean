@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// Depot address - start and end point for all routes
+const DEPOT_ADDRESS = {
+    street: 'Rue Caroline',
+    number: '14',
+    postalCode: '1227',
+    city: 'Les Acacias',
+    name: 'Depot'
+};
+
 interface OrderWithAddress {
     id: string;
     client: {
@@ -13,10 +22,7 @@ interface OrderWithAddress {
 }
 
 // Simple distance calculation based on postal code similarity
-function calculateDistance(order1: OrderWithAddress, order2: OrderWithAddress): number {
-    const postal1 = order1.client?.postalCode || '';
-    const postal2 = order2.client?.postalCode || '';
-    
+function calculateDistance(postal1: string, postal2: string): number {
     // If no postal codes, use high distance
     if (!postal1 || !postal2) return 1000;
     
@@ -29,24 +35,39 @@ function calculateDistance(order1: OrderWithAddress, order2: OrderWithAddress): 
     return Math.abs(num1 - num2);
 }
 
-// Nearest neighbor algorithm for route optimization
+// Nearest neighbor algorithm for route optimization starting from depot
 function optimizeRoute(orders: OrderWithAddress[]): string[] {
-    if (orders.length <= 1) return orders.map(o => o.id);
+    if (orders.length === 0) return [];
+    if (orders.length === 1) return [orders[0].id];
     
     const unvisited = [...orders];
     const route: string[] = [];
     
-    // Start with first order
-    let current = unvisited.shift()!;
+    // Start from depot - find nearest order to depot
+    let nearestIndex = 0;
+    let nearestDistance = Infinity;
+    
+    for (let i = 0; i < unvisited.length; i++) {
+        const distance = calculateDistance(DEPOT_ADDRESS.postalCode, unvisited[i].client?.postalCode || '');
+        if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = i;
+        }
+    }
+    
+    let current = unvisited.splice(nearestIndex, 1)[0];
     route.push(current.id);
     
     // Find nearest neighbor for each step
     while (unvisited.length > 0) {
-        let nearestIndex = 0;
-        let nearestDistance = Infinity;
+        nearestIndex = 0;
+        nearestDistance = Infinity;
         
         for (let i = 0; i < unvisited.length; i++) {
-            const distance = calculateDistance(current, unvisited[i]);
+            const distance = calculateDistance(
+                current.client?.postalCode || '',
+                unvisited[i].client?.postalCode || ''
+            );
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestIndex = i;
@@ -107,6 +128,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             optimizedRoute,
+            depot: DEPOT_ADDRESS,
             stats: {
                 totalStops: orders.length,
                 estimatedTimeSaved: `${timeSaved} min`,

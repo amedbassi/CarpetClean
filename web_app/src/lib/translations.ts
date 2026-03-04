@@ -163,6 +163,10 @@ export const translations = {
             optimization_failed: 'Failed to optimize route. Please try again.',
             delivery_completed: 'Delivery completed successfully!',
             delivery_error: 'Error completing delivery. Please try again.',
+            start_point: 'Start Point',
+            end_point: 'End Point',
+            depot: 'Depot',
+            return_to_depot: 'Return to Depot',
         },
         insights: {
             title: 'Business Insights',
@@ -428,6 +432,10 @@ export const translations = {
             optimization_failed: 'Échec de l\'optimisation de l\'itinéraire. Veuillez réessayer.',
             delivery_completed: 'Livraison terminée avec succès !',
             delivery_error: 'Erreur lors de la livraison. Veuillez réessayer.',
+            start_point: 'Point de Départ',
+            end_point: 'Point d\'Arrivée',
+            depot: 'Dépôt',
+            return_to_depot: 'Retour au Dépôt',
         },
         insights: {
             title: 'Analyses Commerciales',

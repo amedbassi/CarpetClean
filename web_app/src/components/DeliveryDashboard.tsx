@@ -12,6 +12,7 @@ export default function DeliveryDashboard() {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [optimizing, setOptimizing] = useState(false);
     const [optimizedSequence, setOptimizedSequence] = useState<string[] | null>(null);
+    const [depotAddress, setDepotAddress] = useState<any>(null);
     const [completingOrder, setCompletingOrder] = useState<any>(null);
     const [signature, setSignature] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -50,6 +51,7 @@ export default function DeliveryDashboard() {
 
             const data = await response.json();
             setOptimizedSequence(data.optimizedRoute);
+            setDepotAddress(data.depot);
 
             // Show success message with stats
             if (data.stats) {
@@ -149,6 +151,30 @@ export default function DeliveryDashboard() {
 
             {/* Orders List */}
             <div className="grid gap-4">
+                {/* Show depot as start point if route is optimized */}
+                {optimizedSequence && optimizedSequence.length > 0 && depotAddress && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 p-5">
+                        <div className="flex items-start space-x-4">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
+                                <Navigation className="w-4 h-4" />
+                            </div>
+                            <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-green-800 text-sm uppercase tracking-wide">{t.delivery.start_point || 'Start Point'}</span>
+                                    <span className="bg-green-100 text-green-700 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                        {t.delivery.depot || 'Depot'}
+                                    </span>
+                                </div>
+                                <p className="font-bold text-gray-800">{depotAddress.name}</p>
+                                <div className="flex items-start text-xs text-gray-600 font-medium">
+                                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-green-500 flex-shrink-0 mt-0.5" />
+                                    <span>{depotAddress.street} {depotAddress.number}, {depotAddress.postalCode} {depotAddress.city}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {readyOrders
                     .sort((a, b) => {
                         // If we have an optimized sequence, sort by it
@@ -242,6 +268,30 @@ export default function DeliveryDashboard() {
                             </div>
                         );
                     })}
+                
+                {/* Show depot as end point if route is optimized */}
+                {optimizedSequence && optimizedSequence.length > 0 && depotAddress && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 p-5">
+                        <div className="flex items-start space-x-4">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-lg">
+                                <CheckCircle className="w-4 h-4" />
+                            </div>
+                            <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-blue-800 text-sm uppercase tracking-wide">{t.delivery.end_point || 'End Point'}</span>
+                                    <span className="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                        {t.delivery.return_to_depot || 'Return to Depot'}
+                                    </span>
+                                </div>
+                                <p className="font-bold text-gray-800">{depotAddress.name}</p>
+                                <div className="flex items-start text-xs text-gray-600 font-medium">
+                                    <MapPin className="w-3.5 h-3.5 mr-1.5 text-blue-500 flex-shrink-0 mt-0.5" />
+                                    <span>{depotAddress.street} {depotAddress.number}, {depotAddress.postalCode} {depotAddress.city}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {readyOrders.length === 0 && (
