@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, CheckCircle, Receipt, Trash2, Search, ScanLine, User, X, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { setupMobileUtils } from '@/lib/mobileUtils';
 import SignaturePad from './SignaturePad';
 
 interface CarpetItem {
@@ -98,10 +97,6 @@ export default function DeliveryForm() {
             .then(res => res.json())
             .then(data => { if (Array.isArray(data)) setClients(data); })
             .catch(err => console.error('Error fetching clients:', err));
-        
-        // Setup mobile utilities
-        const cleanup = setupMobileUtils();
-        return cleanup;
     }, []);
 
     // Close dropdown on outside click
@@ -327,7 +322,7 @@ export default function DeliveryForm() {
     const isPartnerOrder = scannedReceipts.length > 0;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg">
+        <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl mx-auto p-4 sm:p-6 bg-white rounded-xl shadow-lg mb-96">
             <div className="flex justify-between items-center border-b pb-4">
                 <h2 className="text-xl font-semibold text-gray-800">{t.intake.new_order}</h2>
                 <span className="font-mono text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">

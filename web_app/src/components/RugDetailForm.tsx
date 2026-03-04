@@ -5,7 +5,6 @@ import { Camera, Save, ArrowLeft, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
-import { setupMobileUtils } from '@/lib/mobileUtils';
 
 interface RugDetailFormProps {
     orderId: string;
@@ -93,10 +92,6 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
         };
 
         fetchRugData();
-        
-        // Setup mobile utilities
-        const cleanup = setupMobileUtils();
-        return cleanup;
     }, [orderId, itemId]);
 
     useEffect(() => {
@@ -150,7 +145,7 @@ export default function RugDetailForm({ orderId, itemId }: RugDetailFormProps) {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
+        <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 mb-96">
             <div className="flex items-center mb-6">
                 <Link href="/operations" className="mr-4 text-gray-600 hover:text-gray-900">
                     <ArrowLeft className="w-6 h-6" />
