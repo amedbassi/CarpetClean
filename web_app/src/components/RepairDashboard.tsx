@@ -133,7 +133,7 @@ export default function RepairDashboard() {
                     {t.repair.dashboard}
                 </h2>
                 <div className="bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100 flex items-center">
-                    <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none mr-2">{t.header.delivery}</span>
+                    <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none mr-2">{t.repair.repairs}</span>
                     <span className="text-lg font-black text-orange-800 leading-none">{repairOrders.length}</span>
                 </div>
             </div>

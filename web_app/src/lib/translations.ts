@@ -120,6 +120,7 @@ export const translations = {
         },
         repair: {
             dashboard: 'Repair Team Dashboard',
+            repairs: 'Repairs',
             worn: 'Worn',
             damaged: 'Damaged',
             needs_estimate: 'Needs Estimate',
@@ -373,6 +374,7 @@ export const translations = {
         },
         repair: {
             dashboard: 'Tableau des Réparations',
+            repairs: 'Réparations',
             worn: 'Usé',
             damaged: 'Endommagé',
             needs_estimate: 'Devis Requis',
